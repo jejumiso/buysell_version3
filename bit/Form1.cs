@@ -50,18 +50,7 @@ namespace bit
         {
             InitializeComponent();
         }
-        
-
-        //int j = 0;
-        //private void Timer2_Tick(object Sender, EventArgs e)
-        //{
-        //    txt_count.Text = loop_no + "회(" + (timeloop - j) + ")";
-        //    j++;
-        //    if (j == timeloop)
-        //    {
-        //        j = 0;
-        //    }
-        //}
+       
 
         /// <summary>
         /// 
