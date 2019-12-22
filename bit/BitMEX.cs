@@ -1,4 +1,7 @@
 ﻿//using ServiceStack.Text;
+using bit.Model;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -142,17 +145,19 @@ namespace BitMEX
         //    return JsonSerializer.DeserializeFromString<List<OrderBookItem>>(res);
         //}
 
-        public string GetOrders(string symbol,int count, Boolean reverse)
+
+
+        public string GetOrders(string symbol, string filter ,int count, Boolean reverse,string text)
         {
             var param = new Dictionary<string, string>();
             param["symbol"] = symbol;
-            param["filter"] = "{\"ordStatus\":\"New\"}";
+            param["filter"] = filter;
             //param["columns"] = "";
             param["count"] = count.ToString();
             //param["start"] = 0.ToString();
             param["reverse"] = reverse.ToString();
             //param["startTime"] = "";
-            //param["endTime"] = "";
+            param["text"] = text;
             string result = Query("GET", "/order", param, true);
             return result;
         }
@@ -172,11 +177,20 @@ namespace BitMEX
 
 
 
-        public string GetPositions()
+        public string GetPositions(string filter)
         {
             var param = new Dictionary<string, string>();
-            
+            param["filter"] = filter;
+
             string result = Query("GET", "/position", param, true);
+            return result;
+        }
+
+        public string GetUserMargin()
+        {
+            var param = new Dictionary<string, string>();
+            param["currency"] = "XBt";
+            string result = Query("GET", "/user/margin", param, true);
             return result;
         }
 
@@ -190,6 +204,35 @@ namespace BitMEX
             param["price"] = price.ToString();
             param["ordType"] = ordType; //Market
             return Query("POST", "/order", param, true);
+        }
+
+        public string PostOrders(string symbol, string side, int orderQty, double price, string ordType, string text)
+        {
+            var param = new Dictionary<string, string>();
+            param["symbol"] = symbol;
+            param["side"] = side;  //Buy Sell
+            param["orderQty"] = orderQty.ToString();
+            param["price"] = price.ToString();
+            param["ordType"] = ordType; //Market
+            param["text"] = text; //Market
+            return Query("POST", "/order", param, true);
+        }
+
+        public string PostOrders_bulk(List<bitmex_order> list_bitmex_order)
+        {
+            var param = new Dictionary<string, string>();
+            param["orders"] = JsonConvert.SerializeObject(list_bitmex_order);
+            return Query("POST", "/order/bulk", param, true);
+        }
+
+        public string PostOrders_PUT(string orderID, double price, int orderQty)
+        {
+            var param = new Dictionary<string, string>();
+            param["orderID"] = orderID;
+            param["price"] = price.ToString();
+            param["orderQty"] = orderQty.ToString();  //Buy Sell
+            
+            return Query("PUT", "/order", param, true);
         }
 
         public string DeleteOrders()
@@ -206,6 +249,24 @@ namespace BitMEX
             //param["text"] = "cancel order by ID";
             return Query("DELETE", "/order/all", param, true, true);
         }
+        public string DeleteAllOrders(string filter)
+        {            
+            var param = new Dictionary<string, string>();
+            param["symbol"] = "XBTUSD";          
+            param["filter"] = filter;
+            string resut = Query("DELETE", "/order/all", param, true);
+            return resut;
+        }
+
+        public string DeleteAllOrders(string filter,string text)
+        {
+            var param = new Dictionary<string, string>();
+            param["text"] = text;
+            param["filter"] = filter;
+            string resut = Query("DELETE", "/order/all", param, true);
+            return resut;
+        }
+
 
         private byte[] hmacsha256(byte[] keyByte, byte[] messageBytes)
         {

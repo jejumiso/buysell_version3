@@ -18,136 +18,245 @@ namespace bit
 {
     public partial class Form1 : Form
     {
-        
+
+        // jejuairfarm
         private static string bitmexKey = "I1mAR6Kn0HxzW6uRZS4pSFwq";
         private static string bitmexSecret = "Fmv_Kvyq663upBdsyOwvlt7Mmo1KlvbH7sG5HlV2s9Gv8AMk";
-        BitMEXApi bitmex = new BitMEXApi(bitmexKey, bitmexSecret);
+        //////hyunju3414764
+        //private static string bitmexKey = "G58vcGUdSYs4Kc1CdaImJHrq";
+        //private static string bitmexSecret = "lT25GUXQnn2_30i1mFsyNajQgQ7023p4XZO692YOpu2MDlMY";
+        ////hyunjaeyoung3414
+        //private static string bitmexKey = "MV60V1JtCsCZPRjQfh5uey8e";
+        //private static string bitmexSecret = "meK3UuvpYKejEeluX73SgBvjqwK67tk6qLoVg3GMPRLE678i";
 
+        // [2]
+        BitMEXApi bitemex = new BitMEXApi(bitmexKey, bitmexSecret);
         bitemex_position bitemex_position = new bitemex_position();
+        bitemex_position pre_bitemex_position = new bitemex_position();
         List<bitmex_order> bitmex_orders = new List<bitmex_order>();
-        List<bitmex_bucketed> subBucketeds = new List<bitmex_bucketed>();
+        List<bitmex_bucketed> btmex_Bucketeds = new List<bitmex_bucketed>();
+        // [2-1] 
+        BitMex_ActionClass.BitMex_ActionClass bitmex_ActionClass = new BitMex_ActionClass.BitMex_ActionClass();
 
+        // [3]
         Timer timer1 = new Timer();
-        int loop_no = 0;
+        Timer timer2 = new Timer();
+        
 
+        // [4] 
         Boolean ishide = false;
 
         public Form1()
         {
             InitializeComponent();
         }
+        
 
+        //int j = 0;
+        //private void Timer2_Tick(object Sender, EventArgs e)
+        //{
+        //    txt_count.Text = loop_no + "회(" + (timeloop - j) + ")";
+        //    j++;
+        //    if (j == timeloop)
+        //    {
+        //        j = 0;
+        //    }
+        //}
+
+        /// <summary>
+        /// 
+        /// </summary>
         private void Timer1_Tick(object Sender, EventArgs e)
         {
-            if (!ishide)
+            Auto_Trad_Play();
+        }
+
+        int second = -1;
+        int timeloop = 3;  //고정값
+        Boolean readPosition = false;
+        string pre_timestamp = "";
+        double limit_trad_price = 0.0;
+        user_margin _user_margin = new user_margin();
+        private void Auto_Trad_Play()
+        {
+            //[-]
+            //txt_log2.AppendText(DateTime.Now.ToString("HH시mm분 ss초\r\n"));
+
+
+            //[1] 
+            if (second < 0 || second % 300 < timeloop)
             {
-                if (loop_no % 10 == 0 || true)
-                {
-                    txt_position.Text = "";
-                    txtBox.Text = "";
-                    txt_order.Text = "";
-                }
-                txt_position.AppendText("------------" + (loop_no + 1) + " 회 포지션 확인 ------------- \r\n");
-                txtBox.AppendText("\r\n----------" + (loop_no + 1) + "  회 봉 확인 --------------- \r\n");
-                txt_order.AppendText("\r\n----------" + (loop_no + 1) + "  회 주문내역 확인 --------------- \r\n");
+                //[1-1]   5분에 한번 update
+                _user_margin = JsonConvert.DeserializeObject<user_margin>(bitemex.GetUserMargin());
             }
 
-            Get_Orders();
-            GetPositions();
-            bitmex_Get_bucketed_h();
-            order_System_h();
-            loop_no++;
+            //[2]
+            if (second < 0 || second > 56)  //53초 이후부터는 timeloop초에 한번 주문 
+            {
+                //[2-1] 56초 이후 1회 실행
+                if (readPosition == false)
+                {
+                    limit_trad_price = 7000 * (_user_margin.walletBalance * 0.00000001) * 8;
+                    limit_trad_price = Math.Ceiling(limit_trad_price * 2)/2;
+                    //[1] Positions
+                    GetPositions();
+                    readPosition = true;
+                }
+                
+                //[2-2] 56초 이후 주문 들어갈때까지 계속 실행
+                bitmex_Get_bucketed_2();
+                if (pre_timestamp != btmex_Bucketeds[0].timestamp)
+                {
+                    bitmex_ActionClass.order_System2(limit_trad_price, btmex_Bucketeds, bitemex_position);
+                    second = 0;
+                    readPosition = false;
+                    pre_timestamp = btmex_Bucketeds[0].timestamp;
+                    
+                }         
+            }
+            //[end]
+            second = second + timeloop;
+            //[-]
+            //txt_log2.AppendText(DateTime.Now.ToString("HH시mm분 ss초\r\n"));
+
         }
 
         private void btn_Start_Click_1(object sender, EventArgs e)
         {
-            if (!ishide)
-            {
-                if (loop_no % 10 == 0 || true)
-                {
-                    txt_position.Text = "";
-                    txtBox.Text = "";
-                    txt_order.Text = "";
-                }
-                txt_position.AppendText("------------" + (loop_no + 1) + " 회 포지션 확인 ------------- \r\n");
-                txtBox.AppendText("\r\n----------" + (loop_no + 1) + "  회 봉 확인 --------------- \r\n");
-                txt_order.AppendText("\r\n----------" + (loop_no + 1) + "  회 주문내역 확인 --------------- \r\n");
-            }
+            btn_Start.Enabled = false;
+            btn_Stop.Enabled = true;
 
-            Get_Orders();
-            GetPositions();
-            bitmex_Get_bucketed_h();
-            order_System_h();
-            loop_no++;
+            Auto_Trad_Play();
 
             // timer1의 속성 정의 – 코드에서 Timer 생성
             timer1.Enabled = true;
-            timer1.Interval = 20 * 1000;
+            timer1.Interval = timeloop * 1000;
             timer1.Tick += Timer1_Tick;
+
+            // timer1의 속성 정의 – 코드에서 Timer 생성
+            // 부하 안주기 위해서 테스트에서만 진행.
+            //timer2.Enabled = true;
+            //timer2.Interval = 1 * 1000;
+            //timer2.Tick += Timer2_Tick;
         }
+
+        private void bitmex_Get_bucketed_2()
+        {
+            try
+            {
+                /// [1] 봉 얻어오기
+                var result_bucketed = bitemex.bitmex_Get_bucketed("1m", true, "XBTUSD", 3, true);
+                List<bitmex_bucketed> bucketeds = new List<bitmex_bucketed>();
+                btmex_Bucketeds = JsonConvert.DeserializeObject<List<bitmex_bucketed>>(result_bucketed);
+            }
+            catch (Exception ex)
+            {
+                txt_position.Text = "봉 불러오기 error";
+                throw;
+            }
+
+
+            //if (!ishide)
+            //{
+            //    int j = 0;
+            //    foreach (var item in btmex_Bucketeds)
+            //    {
+            //        txt_position.AppendText((j + 1) + " 번째 1분 봉\r\n");
+            //        txt_position.AppendText("open : " + item.open + "\r\n");
+            //        txt_position.AppendText("high : " + item.high + "\r\n");
+            //        txt_position.AppendText("low : " + item.low + "\r\n");
+            //        txt_position.AppendText("close : " + item.close + "\r\n");
+            //        j++;
+            //    }
+            //}
+
+        }
+
+
+
+
 
         private void Get_Orders()
         {
-            var json_result = bitmex.GetOrders("XBTUSD", 10, true);
-            
-            bitmex_orders = JsonConvert.DeserializeObject<List<bitmex_order>>(json_result);
-
-            if (!ishide)
+            try
             {
-                if (bitmex_orders.Count() == 0)
-                {
-                    txt_order.AppendText("주문 내역이 없습니다.");
-                }
-                foreach (var item in bitmex_orders)
-                {
-                    txt_order.AppendText("주문 : " + item.side + " ");
-                    txt_order.AppendText("" + item.price + " * ");
-                    txt_order.AppendText("" + item.orderQty + " ");
-                    txt_order.AppendText("(" + item.ordStatus + ")\r\n");
-                }
+                var json_result = bitemex.GetOrders("XBTUSD", "{\"ordStatus\":\"New\"}",36, true,"");
+                bitmex_orders = JsonConvert.DeserializeObject<List<bitmex_order>>(json_result);
+
+                //if (!ishide)
+                //{
+                //    if (bitmex_orders.Count() == 0)
+                //    {
+                //        txt_position.AppendText("주문 내역이 없습니다.");
+                //    }
+                //    foreach (var item in bitmex_orders)
+                //    {
+                //        txt_position.AppendText("주문 : " + item.side + " ");
+                //        txt_position.AppendText("" + item.price + " * ");
+                //        txt_position.AppendText("" + item.orderQty + " ");
+                //        txt_position.AppendText("(" + item.ordStatus + ")\r\n");
+                //    }
+                //}
             }
+            catch (Exception ex)
+            {
+                txt_position.Text = "주문 불러오기 에러.";
+                throw;
+            }
+
+
         }
 
         private void btn_Stop_Click(object sender, EventArgs e)
         {
+            btn_Start.Enabled = true;
+            btn_Stop.Enabled = false;
             timer1.Enabled = false;
-            txtBox.AppendText("\r\n타이머가 중지 되었습니다.");
             txt_position.AppendText("\r\n타이머가 중지 되었습니다.");
-            loop_no = 0;
+            txt_position.AppendText("\r\n타이머가 중지 되었습니다.");
+        }
+        private void btn_Stop2_Click(object sender, EventArgs e)
+        {
+            btn_Start.Enabled = false;
         }
 
         private void GetPositions()
         {
-            var json_result = bitmex.GetPositions();
+            var json_result = bitemex.GetPositions("{ \"symbol\" : \"XBTUSD\" }");
             List<bitemex_position> _bitemex_positions = new List<bitemex_position>();
             _bitemex_positions = JsonConvert.DeserializeObject<List<bitemex_position>>(json_result);
 
             if (_bitemex_positions.Count == 1)
             {
                 // 포지션은 무조건 1개 밖에 없을 것임....
-
                 if (_bitemex_positions[0].currentQty == 0)
                 {
-                    if (!ishide)
-                    {
-                        txt_position.AppendText("포지션 없음.\r\n");
-                    }
                     bitemex_position.account = 0;
+                    bitemex_position.symbol = "";
                     bitemex_position.currentQty = 0;
-                    bitemex_position.avgCostPrice = 0;
+                    bitemex_position.avgCostPrice = 0.0;
+                    bitemex_position.marginCallPrice = 0.0;
+                    bitemex_position.liquidationPrice = 0.0;
+                    //if (!ishide)
+                    //{
+                    //    txt_position.AppendText("포지션 없음.\r\n");
+                    //}
+
                 }
                 else
                 {
-                    if (!ishide)
-                    {
-                        txt_position.AppendText("포지션 계정 :" + _bitemex_positions[0].account + "\r\n");
-                        txt_position.AppendText("symbol : " + _bitemex_positions[0].symbol + "\r\n");
-                        txt_position.AppendText("avgCostPrice : " + _bitemex_positions[0].avgCostPrice + "\r\n");
-                        txt_position.AppendText("currentQty : " + _bitemex_positions[0].currentQty + "\r\n");
-                    }
                     bitemex_position.account = _bitemex_positions[0].account;
+                    bitemex_position.symbol = _bitemex_positions[0].symbol;
                     bitemex_position.currentQty = _bitemex_positions[0].currentQty;
                     bitemex_position.avgCostPrice = _bitemex_positions[0].avgCostPrice;
+                    bitemex_position.marginCallPrice = _bitemex_positions[0].marginCallPrice;
+                    bitemex_position.liquidationPrice = _bitemex_positions[0].liquidationPrice;
+                    //if (!ishide)
+                    //{
+                    //    txt_position.AppendText("포지션 : " + bitemex_position.avgCostPrice + " * "+ bitemex_position.currentQty + "\r\n");
+                    //    txt_position.AppendText("(청산: " + bitemex_position.marginCallPrice + " / "+ bitemex_position.liquidationPrice + ")\r\n");
+
+                    //}
                 }
             }
             else
@@ -157,346 +266,280 @@ namespace bit
             }
         }
 
-        /// <summary>
-        /// 분봉
-        /// </summary>
-        private void bitmex_Get_bucketed_Min()
-        {
-            /// [1] 봉 얻어오기
-            var result_bucketed = bitmex.bitmex_Get_bucketed("1m", true, "XBTUSD", 2, true);
-            List<bitmex_bucketed> bucketeds = new List<bitmex_bucketed>();
-            bucketeds = JsonConvert.DeserializeObject<List<bitmex_bucketed>>(result_bucketed);
-            
-            subBucketeds = subbucketeds(bucketeds, 2, true);
+        
 
-            int j = 0;
-            foreach (var item in subBucketeds)
-            {
-                txtBox.AppendText((j+1) + " 번째 분 봉\r\n");
-                txtBox.AppendText("open : " + item.open + "\r\n");
-                txtBox.AppendText("high : " + item.high + "\r\n");
-                txtBox.AppendText("low : " + item.low + "\r\n");
-                txtBox.AppendText("close : " + item.close + "\r\n");
-                //txtBox.AppendText("trades : " + item.trades + "\r\n");
-                //txtBox.AppendText("volume(거래량?) : " + item.volume + "\r\n");
-                //txtBox.AppendText("vwap : " + item.vwap + "\r\n");
-                //txtBox.AppendText("lastSize : " + item.lastSize + "\r\n");
-                //txtBox.AppendText("turnover : " + item.turnover + "\r\n");
-                //txtBox.AppendText("homeNotional : " + item.homeNotional + "\r\n");
-                //txtBox.AppendText("foreignNotional : " + item.foreignNotional + "\r\n");
-                j++;
-            }
-
-            
-        }
-
-        private void order_System_min()
-        {
-
-
-            double high = subBucketeds[0].high;
-            double low = subBucketeds[0].low;
-            double open = subBucketeds[0].open;
-            double close = subBucketeds[0].close;
-
-
-            int step1_Qty = 200;
-            int step2_Qty = 600;
-            double step1_spring = 9.0;
-            double step2_spring = 42.0;
-            double step1_margin = 10.0;
-            double step2_margin = 80.0;
-
-
-            ///
-            ///  아래주문에서 30개 주문을 넣었는데 10개만 체결시 오류 생김!!!!!!!!
-
-            if (bitemex_position.currentQty == 0)  // 1단계
-            {
-                double Sellprice = subBucketeds[0].open + step1_spring;
-                double Buyprice = subBucketeds[0].open - step1_spring;
-
-                Boolean ordercheck = false;
-                // [1] 조건의 주문이 아니면 주문 취소
-                foreach (var item in bitmex_orders)
-                {
-                    if (item.price != Sellprice && item.price != Buyprice)
-                    {
-                        ordercheck = true;
-                        string deleteAll = bitmex.DeleteAllOrders();
-                    }
-
-                }
-                if (ordercheck)
-                {
-                    string deleteAll = bitmex.DeleteAllOrders();
-                }
-
-                //[2]
-                if (bitmex_orders.Count() == 0 || ordercheck)
-                {
-                    // [1단계] open에서 +- 18 매수/매매 주문
-                    
-                    string result_order1 = bitmex.PostOrders("XBTUSD", "Sell", step1_Qty, Sellprice, "Limit");
-                    if (true)
-                    {
-                        //주문 성공 혹은 실패 알려주기
-                    }
-                    string result_order2 = bitmex.PostOrders("XBTUSD", "Buy", step1_Qty, Buyprice, "Limit");
-                    if (true)
-                    {
-                        //주문 성공 혹은 실패 알려주기
-                    }
-                }
-                
-            }
-            else if(bitemex_position.currentQty <= step1_Qty) // 2단계
-            {
-
-                Boolean ordercheck = false;
-
-                if (Math.Abs(bitemex_position.currentQty) < step1_Qty)
-                {
-                    // 극단적인 경우로서 미체결 물량이 있을경우임.. 가능성 희박..
-                    // [1] 전량 매도 처리 하자..
-                    // [2] 주문 전부 취소하자.
-                    string deleteall_result = bitmex.DeleteAllOrders();
-                    ordercheck = true;
-                }
-
-                if (bitmex_orders.Count() != 2)  //1단계 주문이 있는지 확인 : 먼가 깔끔하지 않음..
-                {
-                    // 1단계 주문 취소
-                    string result = bitmex.DeleteAllOrders();
-                    // 단계취소하면서 바로 주문을 넣어야하는데 로직 잘못됨..
-                    // 2단계는 spring 크게 둘꺼니깐 일단 이렇게 하자.
-
-                    ordercheck = true;
-                }
-
-
-
-                if (bitmex_orders.Count() == 0 || ordercheck)
-                {
-
-                    // [2단계] bitemex_position.currentCost  -50 매도 주문
-                    double Sellprice = bitemex_position.currentQty > 0 ? (double)bitemex_position.avgCostPrice + step1_margin : (double)bitemex_position.avgCostPrice + step2_spring;
-
-                    double Buyprice = bitemex_position.currentQty > 0 ? (double)bitemex_position.avgCostPrice - step2_spring : (double)bitemex_position.avgCostPrice - step1_margin;
-
-                    if (bitemex_position.currentQty > 0)
-                    {
-                        string result_order1 = bitmex.PostOrders("XBTUSD", "Sell", step1_Qty, Sellprice, "Limit");
-                        if (true)
-                        {
-                            //주문 성공 혹은 실패 알려주기
-                        }
-                        string result_order2 = bitmex.PostOrders("XBTUSD", "Buy", step2_Qty, Buyprice, "Limit");
-                        if (true)
-                        {
-                            //주문 성공 혹은 실패 알려주기
-                        }
-                    }
-                    else
-                    {
-                        string result_order1 = bitmex.PostOrders("XBTUSD", "Sell", step2_Qty, Sellprice, "Limit");
-                        if (true)
-                        {
-                            //주문 성공 혹은 실패 알려주기
-                        }
-                        string result_order2 = bitmex.PostOrders("XBTUSD", "Buy", step1_Qty, Buyprice, "Limit");
-                        if (true)
-                        {
-                            //주문 성공 혹은 실패 알려주기
-                        }
-                    }
-                }
-
-
-            }
-            else if (bitemex_position.currentQty == step1_Qty + step2_Qty) // 3단계
-            {
-                // 2 단계 프로세스와 거의 같을듯.
-
-
-                if (bitemex_position.currentQty > 0)
-                {
-                    string result_order1 = bitmex.PostOrders("XBTUSD", "Sell", step1_Qty, (double)bitemex_position.avgCostPrice + step2_margin, "Limit");
-                    if (true)
-                    {
-                        //주문 성공 혹은 실패 알려주기
-                    }
-                }
-                else
-                {
-                    
-                    string result_order2 = bitmex.PostOrders("XBTUSD", "Buy", step1_Qty, (double)bitemex_position.avgCostPrice - step2_margin, "Limit");
-                    if (true)
-                    {
-                        //주문 성공 혹은 실패 알려주기
-                    }
-                }
-
-            }
-
-
-        }
-
-        /// <summary>
-        /// 시간봉
-        /// </summary>
-        private void bitmex_Get_bucketed_h()
-        {
-            /// [1] 봉 얻어오기 : 합치기 할때..
-            // var result_bucketed = bitmex.bitmex_Get_bucketed("1h", true, "XBTUSD", 6, true);
-            // List<bitmex_bucketed> bucketeds = new List<bitmex_bucketed>();
-            // bucketeds = JsonConvert.DeserializeObject<List<bitmex_bucketed>>(result_bucketed);
-            //subBucketeds = subbucketeds(bucketeds, 1, true);
-
-
-            /// [1] 봉 얻어오기 : 합치기 안할때
-            var result_bucketed = bitmex.bitmex_Get_bucketed("1h", true, "XBTUSD", 6, true);
-            subBucketeds = JsonConvert.DeserializeObject<List<bitmex_bucketed>>(result_bucketed);
-
-
-            int j = 0;
-            foreach (var item in subBucketeds)
-            {
-                if (!ishide)
-                {
-                    txtBox.AppendText((j + 1) + " 번째 봉\r\n");
-                    txtBox.AppendText("open : " + item.open + "\r\n");
-                    txtBox.AppendText("high : " + item.high + "\r\n");
-                    txtBox.AppendText("low : " + item.low + "\r\n");
-                    txtBox.AppendText("close : " + item.close + "\r\n");
-                }
-                j++;
-            }
-        }
-
-        private void order_System_h()
-        {
-            if (subBucketeds.Count() == 6)
-            {
-                double gap4 = subBucketeds[4].open - subBucketeds[4].close;
-                double gap3 = subBucketeds[3].open - subBucketeds[3].close;
-                double gap2 = subBucketeds[2].open - subBucketeds[2].close;
-                double gap1 = subBucketeds[1].open - subBucketeds[1].close;  //갭 작으면 실행..
-                double gap0 = subBucketeds[0].open - subBucketeds[0].close;  //현재봉 : 쓸일 없음
-
-                if (bitemex_position.currentQty != 0)
-                {
-                    if (bitmex_orders.Count() == 0)
-                    {
-                        if (bitemex_position.currentQty > 0)
-                        {
-                            bitmex.PostOrders("XBTUSD", "Sell", Math.Abs(bitemex_position.currentQty), Math.Round((double)bitemex_position.avgCostPrice, 1) + 120, "Limit");
-                        }
-                        else
-                        {
-                            bitmex.PostOrders("XBTUSD", "Buy", Math.Abs(bitemex_position.currentQty), Math.Round((double)bitemex_position.avgCostPrice, 1) - 120, "Limit");
-                        }
-                    }
-                    
-                }
-                else
-                {
-                    if ((Math.Abs(gap2) >= 45 && Math.Abs(gap3) >= 45 && gap2 * gap3 > 0 && Math.Abs(gap2 + gap3) > 110) || (Math.Abs(gap2) > 110))
-                    {
-                        double chkway = gap2 * gap1;
-
-                        if (chkway > 0 && Math.Abs(gap1) < 13.0 || chkway < 0 && Math.Abs(gap1) < 26.0)  // 방향이 같을 경우에는 갭 13미만... 갭 방향이 바뀌었으면 갭 25미만일 경우
-                        {
-                            if (gap2 > 0)
-                            {
-                                bitmex.DeleteAllOrders();
-                                string result_order1 = bitmex.PostOrders("XBTUSD", "Sell", 1000, subBucketeds[0].close + 0.5, "Limit");
-                            }
-                            else
-                            {
-                                bitmex.DeleteAllOrders();
-                                string result_order1 = bitmex.PostOrders("XBTUSD", "Buy", 1000, subBucketeds[0].close - 0.5, "Limit");
-                            }
-                        }
-                    }
-                }
-                
-            }
-            else
-            {
-                txt_position.AppendText("주문시스템 확인 할것!!!!!!!!!!!!!");
-            }
-        }
-
-
-
-
-
-        private List<bitmex_bucketed> subbucketeds(List<bitmex_bucketed> bucketeds , int size , Boolean partial)
-        {
-            var i = 0;
-            var j = 0;
-            List<bitmex_bucketed> subBucketeds = new List<bitmex_bucketed>();
-
-            bitmex_bucketed bitmex_bucketed = new bitmex_bucketed();
-
-            foreach (var item in bucketeds)
-            {
-                
-                if (partial)
-                {
-                    if (j%size == 0)
-                    {
-                        bitmex_bucketed= new bitmex_bucketed();
-                    }
-
-
-                    if (i == 0)
-                    {
-                        bitmex_bucketed.high = item.high;
-                        bitmex_bucketed.low = item.low;
-                        bitmex_bucketed.open = item.open;
-                        bitmex_bucketed.close = item.close;
-                    }
-                    else
-                    {
-                        bitmex_bucketed.high = bitmex_bucketed.high > item.high ? bitmex_bucketed.high  : item.high;
-                        bitmex_bucketed.low = bitmex_bucketed.low < item.low ? bitmex_bucketed.low : item.low;
-                        bitmex_bucketed.open = item.open;
-                        //d.close = item.close;
-                    }
-                    int d = i % size;
-                    if (i % size == (size-1) || j == bucketeds.Count() -1)
-                    {
-                        i = 0;
-                        subBucketeds.Add(bitmex_bucketed);
-                        subBucketeds.ToList();
-
-                    }
-                    else
-                    {
-                        i++;
-                    }
-                    j++;
-                }
-
-                
-            }
-
-            return subBucketeds;
-        }
 
         private void Form1_Load(object sender, EventArgs e)
         {
 
         }
 
+        
+
+
+
+        private void btn_potionConfirm_Click(object sender, EventArgs e)
+        {
+            GetPositions();
+        }
+
+        private void btn_positionDel_Click(object sender, EventArgs e)
+        {
+            bitmex_Get_bucketed_2();
+            GetPositions();
+
+            if (bitemex_position.currentQty != 0)
+            {
+                if (bitemex_position.currentQty > 0)
+                {
+                    string result_order1 = bitemex.PostOrders("XBTUSD", "Sell", bitemex_position.currentQty, btmex_Bucketeds[0].close - 0.5, "Limit");
+                }
+                else
+                {
+                    string result_order1 = bitemex.PostOrders("XBTUSD", "Buy", Math.Abs(bitemex_position.currentQty), btmex_Bucketeds[0].close + 0.5, "Limit");
+                }
+                //chk_OrderChange = true;
+            }
+            Get_Orders();
+
+        }
+
+
         private void btn_test1_Click(object sender, EventArgs e)
         {
+            //Stop
+            //Limit
+            //StopLimit
+            var result_bucketed = bitemex.bitmex_Get_bucketed("1m", true, "XBTUSD", 1, true);
+            btmex_Bucketeds = JsonConvert.DeserializeObject<List<bitmex_bucketed>>(result_bucketed);
+            string result_order1 = bitemex.PostOrders("XBTUSD", "Sell", 100, btmex_Bucketeds[0].close + 50, "Limit");
+            //string result_order2 = bitmex.PostOrders("XBTUSD", "Buy", 100, btmex_Bucketeds[0].close - 50, "Limit");
+            Get_Orders();
+        }
 
-            // Limit Stop  StopLimit  MarketIfTouched   LimitIfTouched
-            string result_order1 = bitmex.PostOrders("XBTUSD", "Sell", 60, 7514.0, "Limit");
-            txtBox.AppendText(result_order1 + " \r\n");
+        private void btn_test2_Click(object sender, EventArgs e)
+        {
+            var result_bucketed = bitemex.bitmex_Get_bucketed("1m", true, "XBTUSD", 1, true);
+            btmex_Bucketeds = JsonConvert.DeserializeObject<List<bitmex_bucketed>>(result_bucketed);
+            string result_order1 = bitemex.PostOrders("XBTUSD", "Sell", 40, btmex_Bucketeds[0].close + 0.5, "Limit");
+            Get_Orders();
+        }
+        private void btn_test3_Click(object sender, EventArgs e)
+        {
+            var result_bucketed = bitemex.bitmex_Get_bucketed("1m", true, "XBTUSD", 1, true);
+            btmex_Bucketeds = JsonConvert.DeserializeObject<List<bitmex_bucketed>>(result_bucketed);
+            string result_order1 = bitemex.PostOrders("XBTUSD", "Sell", 40, btmex_Bucketeds[0].close - 0.5, "Limit");
+            Get_Orders();
+        }
+
+      
+
+        private void btn_orderConfirm_Click(object sender, EventArgs e)
+        {
+            //chk_OrderChange = true;
+            Get_Orders();
+        }
+
+        private void btn_Step_Cal_Click(object sender, EventArgs e)
+        {
+            int step1_Qty = 5011110; double step1_spring = 4.0; double _margin1 = 5.0;          // 7025.0      ( 35,125,000)
+            int step2_Qty = 3000; double step2_spring = 8.0; double _margin2 = 6.0;         // 7037.5    ( 70,375,000)
+            int step3_Qty = 8000; double step3_spring = 16.0; double _margin3 = 12.0;       // 7068.75     (141,375,000)
+            int step4_Qty = 12000; double step4_spring = 35.0; double _margin4 = 12.0;
+            int step5_Qty = 15000; double step5_spring = 60.0; double _margin5 = 15.0;
+            int step6_Qty = 18000; double step6_spring = 90.0; double _margin6 = 15.0;
+            int step7_Qty = 45000; double step7_spring = 150.0; double _margin7 = 10.0;
+            int step8_Qty = 80000; double step8_spring = 200.0; double _margin8 = 10.0;
+            int step9_Qty = 80000; double step9_spring = 300.0; double _margin9 = 10.0;
+            int step10_Qty = 80000; double step10_spring = 400.0; double _margin10 = 10.0;
+            int step11_Qty = 80000; double step11_spring = 500.0; double _margin11 = 10.0;
+
+            txt_position.Text = "";
+
+            double standardXBT = 7000;
+            double total_BuyQty = 0.0;
+            double income = 0.0;
+            double now_XBTUSD = 0.0;
+            double pre_XBTUSD = 0.0;
+            double buy_Bitcoin = 0.0;
+            double average_Bitcoin = 0.0;
+            int total_QTY = 0;
+
+
+            double sell_Bitcoin = 0;
+
+
+            pre_XBTUSD = 0;
+            now_XBTUSD = standardXBT - step1_spring;
+            total_QTY = total_QTY + step1_Qty;
+            total_BuyQty = total_BuyQty + now_XBTUSD * step1_Qty;
+            buy_Bitcoin = Math.Round((0 + (step1_Qty / now_XBTUSD)) * 100000)/100000;
+            average_Bitcoin = Math.Round(total_BuyQty / total_QTY * 10) / 10;   //
+            sell_Bitcoin = buy_Bitcoin * (average_Bitcoin + _margin1) /(average_Bitcoin);
+            income = sell_Bitcoin - buy_Bitcoin;
+            txt_position.AppendText("[ 1단계]  " + string.Format("{0,8}",total_QTY) + "XBT(" + buy_Bitcoin + " bitcoin) (평균-" + average_Bitcoin +
+                "  진입가격-" + now_XBTUSD + "  " +
+                "  판매가격-" + (average_Bitcoin + _margin1) +
+                "{" + Math.Round(sell_Bitcoin * 1000) / 1000 + "})      이익:" + Math.Round(income * 10000) / 10000 + " bitcoin\r\n\r\n");
+
+
+
+            pre_XBTUSD = now_XBTUSD;
+            now_XBTUSD = standardXBT - step2_spring;
+            total_QTY = total_QTY + step2_Qty;
+            total_BuyQty = total_BuyQty + now_XBTUSD * step2_Qty;
+            buy_Bitcoin = Math.Round(((buy_Bitcoin * now_XBTUSD / pre_XBTUSD) + step2_Qty / now_XBTUSD) * 100000) / 100000;
+            average_Bitcoin = Math.Round(total_BuyQty / total_QTY * 10) / 10;   //
+            sell_Bitcoin = buy_Bitcoin * (average_Bitcoin + _margin2) / (average_Bitcoin);
+            income = sell_Bitcoin - buy_Bitcoin;
+            txt_position.AppendText("[ 2단계]  " + string.Format("{0,8}", total_QTY) + "XBT(" + buy_Bitcoin + " bitcoin) (평균-" + average_Bitcoin +
+                "  진입가격-" + now_XBTUSD + "  " +
+                "  판매가격-" + (average_Bitcoin + _margin2) +
+                "{" + Math.Round(sell_Bitcoin * 1000) / 1000 + "})      이익:" + Math.Round(income * 10000) / 10000 + " bitcoin\r\n\r\n");
+
+
+            pre_XBTUSD = now_XBTUSD;
+            now_XBTUSD = standardXBT - step3_spring;
+            total_QTY = total_QTY + step3_Qty;
+            total_BuyQty = total_BuyQty + now_XBTUSD * step3_Qty;
+
+            buy_Bitcoin = Math.Round(((buy_Bitcoin * now_XBTUSD / pre_XBTUSD) + step3_Qty / now_XBTUSD) * 100000) / 100000;
+            average_Bitcoin = Math.Round(total_BuyQty / total_QTY * 10) / 10;   //
+            sell_Bitcoin = buy_Bitcoin * (average_Bitcoin + _margin3) / (average_Bitcoin);
+            income = sell_Bitcoin - buy_Bitcoin;
+            txt_position.AppendText("[ 3단계]  " + string.Format("{0,8}", total_QTY) + "XBT(" + buy_Bitcoin + " bitcoin) (평균-" + average_Bitcoin +
+                "  진입가격-" + now_XBTUSD + "  " +
+                "  판매가격-" + (average_Bitcoin + _margin3) +
+                "{" + Math.Round(sell_Bitcoin * 1000) / 1000 + "})      이익:" + Math.Round(income * 10000) / 10000 + " bitcoin\r\n\r\n");
+
+
+
+            pre_XBTUSD = now_XBTUSD;
+            now_XBTUSD = standardXBT - step4_spring;
+            total_QTY = total_QTY + step4_Qty;
+            total_BuyQty = total_BuyQty + now_XBTUSD * step4_Qty;
+
+            buy_Bitcoin = Math.Round(((buy_Bitcoin * now_XBTUSD / pre_XBTUSD) + step4_Qty / now_XBTUSD) * 100000) / 100000;
+            average_Bitcoin = Math.Round(total_BuyQty / total_QTY * 10) / 10;   //
+            sell_Bitcoin = buy_Bitcoin * (average_Bitcoin + _margin4) / (average_Bitcoin);
+            income = sell_Bitcoin - buy_Bitcoin;
+            txt_position.AppendText("[ 4단계]  " + string.Format("{0,8}", total_QTY) + "XBT(" + buy_Bitcoin + " bitcoin) (평균-" + average_Bitcoin +
+                "  진입가격-" + now_XBTUSD + "  " +
+                "  판매가격-" + (average_Bitcoin + _margin4) +
+                "{" + Math.Round(sell_Bitcoin * 1000) / 1000 + "})      이익:" + Math.Round(income * 10000) / 10000 + " bitcoin\r\n\r\n");
+
+            pre_XBTUSD = now_XBTUSD;
+            now_XBTUSD = standardXBT - step5_spring;
+            total_QTY = total_QTY + step5_Qty;
+            total_BuyQty = total_BuyQty + now_XBTUSD * step5_Qty;
+
+            buy_Bitcoin = Math.Round(((buy_Bitcoin * now_XBTUSD / pre_XBTUSD) + step5_Qty / now_XBTUSD) * 100000) / 100000;
+            average_Bitcoin = Math.Round(total_BuyQty / total_QTY * 10) / 10;   //
+            sell_Bitcoin = buy_Bitcoin * (average_Bitcoin + _margin5) / (average_Bitcoin);
+            income = sell_Bitcoin - buy_Bitcoin;
+            txt_position.AppendText("[ 5단계]  " + string.Format("{0,8}", total_QTY) + "XBT(" + buy_Bitcoin + " bitcoin) (평균-" + average_Bitcoin +
+                "  진입가격-" + now_XBTUSD + "  " +
+                "  판매가격-" + (average_Bitcoin + _margin5) +
+                "{" + Math.Round(sell_Bitcoin * 1000) / 1000 + "})      이익:" + Math.Round(income * 10000) / 10000 + " bitcoin\r\n\r\n");
+
+
+
+
+            pre_XBTUSD = now_XBTUSD;
+            now_XBTUSD = standardXBT - step6_spring;
+            total_QTY = total_QTY + step6_Qty;
+            total_BuyQty = total_BuyQty + now_XBTUSD * step6_Qty;
+
+            buy_Bitcoin = Math.Round(((buy_Bitcoin * now_XBTUSD / pre_XBTUSD) + step6_Qty / now_XBTUSD) * 100000) / 100000;
+            average_Bitcoin = Math.Round(total_BuyQty / total_QTY * 10) / 10;   //
+            sell_Bitcoin = buy_Bitcoin * (average_Bitcoin + _margin6) / (average_Bitcoin);
+            income = sell_Bitcoin - buy_Bitcoin;
+            txt_position.AppendText("[ 6단계]  " + string.Format("{0,8}", total_QTY) + "XBT(" + buy_Bitcoin + " bitcoin) (평균-" + average_Bitcoin +
+                "  진입가격-" + now_XBTUSD + "  " +
+                "  판매가격-" + (average_Bitcoin + _margin6) +
+                "{" + Math.Round(sell_Bitcoin * 1000) / 1000 + "})      이익:" + Math.Round(income * 10000) / 10000 + " bitcoin\r\n\r\n");
+
+            pre_XBTUSD = now_XBTUSD;
+            now_XBTUSD = standardXBT - step7_spring;
+            total_QTY = total_QTY + step7_Qty;
+            total_BuyQty = total_BuyQty + now_XBTUSD * step7_Qty;
+
+            buy_Bitcoin = Math.Round(((buy_Bitcoin * now_XBTUSD / pre_XBTUSD) + step7_Qty / now_XBTUSD) * 100000) / 100000;
+            average_Bitcoin = Math.Round(total_BuyQty / total_QTY * 10) / 10;   //
+            sell_Bitcoin = buy_Bitcoin * (average_Bitcoin + _margin7) / (average_Bitcoin);
+            income = sell_Bitcoin - buy_Bitcoin;
+            txt_position.AppendText("[ 7단계]  " + string.Format("{0,8}", total_QTY) + "XBT(" + buy_Bitcoin + " bitcoin) (평균-" + average_Bitcoin +
+                "  진입가격-" + now_XBTUSD + "  " +
+                "  판매가격-" + (average_Bitcoin + _margin7) +
+                "{" + Math.Round(sell_Bitcoin * 1000) / 1000 + "})      이익:" + Math.Round(income * 10000) / 10000 + " bitcoin\r\n\r\n");
+
+            pre_XBTUSD = now_XBTUSD;
+            now_XBTUSD = standardXBT - step8_spring;
+            total_QTY = total_QTY + step8_Qty;
+            total_BuyQty = total_BuyQty + now_XBTUSD * step8_Qty;
+
+            buy_Bitcoin = Math.Round(((buy_Bitcoin * now_XBTUSD / pre_XBTUSD) + step8_Qty / now_XBTUSD) * 100000) / 100000;
+            average_Bitcoin = Math.Round(total_BuyQty / total_QTY * 10) / 10;   //
+            sell_Bitcoin = buy_Bitcoin * (average_Bitcoin + _margin8) / (average_Bitcoin);
+            income = sell_Bitcoin - buy_Bitcoin;
+            txt_position.AppendText("[ 8단계]  " + string.Format("{0,8}", total_QTY) + "XBT(" + buy_Bitcoin + " bitcoin) (평균-" + average_Bitcoin +
+                "  진입가격-" + now_XBTUSD + "  " +
+                "  판매가격-" + (average_Bitcoin + _margin8) +
+                "{" + Math.Round(sell_Bitcoin * 1000) / 1000 + "})      이익:" + Math.Round(income * 10000) / 10000 + " bitcoin\r\n\r\n");
+
+
+            pre_XBTUSD = now_XBTUSD;
+            now_XBTUSD = standardXBT - step9_spring;
+            total_QTY = total_QTY + step9_Qty;
+            total_BuyQty = total_BuyQty + now_XBTUSD * step9_Qty;
+
+            buy_Bitcoin = Math.Round(((buy_Bitcoin * now_XBTUSD / pre_XBTUSD) + step9_Qty / now_XBTUSD) * 100000) / 100000;
+            average_Bitcoin = Math.Round(total_BuyQty / total_QTY * 10) / 10;   //
+            sell_Bitcoin = buy_Bitcoin * (average_Bitcoin + _margin9) / (average_Bitcoin);
+            income = sell_Bitcoin - buy_Bitcoin;
+            txt_position.AppendText("[ 9단계]  " + string.Format("{0,8}", total_QTY) + "XBT(" + buy_Bitcoin + " bitcoin) (평균-" + average_Bitcoin +
+                "  진입가격-" + now_XBTUSD + "  " +
+                "  판매가격-" + (average_Bitcoin + _margin9) +
+                "{" + Math.Round(sell_Bitcoin * 1000) / 1000 + "})      이익:" + Math.Round(income * 10000) / 10000 + " bitcoin\r\n\r\n");
+
+
+            pre_XBTUSD = now_XBTUSD;
+            now_XBTUSD = standardXBT - step10_spring;
+            total_QTY = total_QTY + step10_Qty;
+            total_BuyQty = total_BuyQty + now_XBTUSD * step10_Qty;
+
+            buy_Bitcoin = Math.Round(((buy_Bitcoin * now_XBTUSD / pre_XBTUSD) + step10_Qty / now_XBTUSD) * 100000) / 100000;
+            average_Bitcoin = Math.Round(total_BuyQty / total_QTY * 10) / 10;   //
+            sell_Bitcoin = buy_Bitcoin * (average_Bitcoin + _margin10) / (average_Bitcoin);
+            income = sell_Bitcoin - buy_Bitcoin;
+            txt_position.AppendText("[10단계]  " + string.Format("{0,8}", total_QTY) + "XBT(" + buy_Bitcoin + " bitcoin) (평균-" + average_Bitcoin +
+                "  진입가격-" + now_XBTUSD + "  " +
+                "  판매가격-" + (average_Bitcoin + _margin10) +
+                "{" + Math.Round(sell_Bitcoin * 1000) / 1000 + "})      이익:" + Math.Round(income * 10000) / 10000 + " bitcoin\r\n\r\n");
+
+
+            pre_XBTUSD = now_XBTUSD;
+            now_XBTUSD = standardXBT - step11_spring;
+            total_QTY = total_QTY + step11_Qty;
+            total_BuyQty = total_BuyQty + now_XBTUSD * step11_Qty;
+
+            buy_Bitcoin = Math.Round(((buy_Bitcoin * now_XBTUSD / pre_XBTUSD) + step11_Qty / now_XBTUSD) * 100000) / 100000;
+            average_Bitcoin = Math.Round(total_BuyQty / total_QTY * 10) / 10;   //
+            sell_Bitcoin = buy_Bitcoin * (average_Bitcoin + _margin11) / (average_Bitcoin);
+            income = sell_Bitcoin - buy_Bitcoin;
+            txt_position.AppendText("[11단계]  " + string.Format("{0,8}", total_QTY) + "XBT(" + buy_Bitcoin + " bitcoin) (평균-" + average_Bitcoin +
+                "  진입가격-" + now_XBTUSD + "  " +
+                "  판매가격-" + (average_Bitcoin + _margin11) +
+                "{" + Math.Round(sell_Bitcoin * 1000) / 1000 + "})      이익:" + Math.Round(income * 10000) / 10000 + " bitcoin\r\n\r\n");
+
+        }
+
+        private void btn_balance_Click(object sender, EventArgs e)
+        {
+            _user_margin = JsonConvert.DeserializeObject<user_margin>(bitemex.GetUserMargin());
+            txt_position.AppendText("○ " + DateTime.Now.ToString("MM월dd일 HH시mm분") +
+                 "         " + string.Format("{0:#,###}", _user_margin.walletBalance * 0.1) +
+                 "         " + string.Format("{0:#,###}", _user_margin.marginBalance * 0.1) + "\r\n");
         }
     }
 }

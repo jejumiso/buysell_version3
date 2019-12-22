@@ -26,40 +26,17 @@ namespace bit.Model
     {
         public int account { get; set; }
         public string symbol { get; set; }
-        public string currency { get; set; }
-        public string underlying { get; set; }
-        public string quoteCurrency { get; set; }
-        public string commission { get; set; }
-        public string initMarginReq { get; set; }
-        public string maintMarginReq { get; set; }
-        public string riskLimit { get; set; }
-        public string leverage { get; set; }
-        public string prevClosePrice { get; set; }
-        public string openingTimestamp { get; set; }
-        public string openingQty { get; set; }
-        public string openingCost { get; set; }
-        public string openingComm { get; set; }
-        public string openOrderBuyQty { get; set; }
-        public string openOrderBuyCost { get; set; }
-        public string currentTimestamp { get; set; }
         public int currentQty { get; set; }    // 규모
-        //public double currentCost { get; set; }
-        public string isOpen { get; set; }
-        public string markPrice { get; set; }
-        public string foreignNotional { get; set; }
         public double? avgCostPrice { get; set; }    // 매매 가격 : 
-        public string avgEntryPrice { get; set; }   // 매매 가격 :
-        public string breakEvenPrice { get; set; }
-        public string marginCallPrice { get; set; }  // 청산 가격 
-        public string liquidationPrice { get; set; } // 청산 가격
-        public string bankruptPrice { get; set; }
-        public string timestamp { get; set; }
-        public string lastPrice { get; set; }
+        public double? avgEntryPrice { get; set; }   // 매매 가격 :
+        public double? marginCallPrice { get; set; }  // 청산 가격 
+        public double? liquidationPrice { get; set; } // 청산 가격
     }
 
     public class bitmex_order
     {
         public string orderID { get; set; }
+        public string clOrdID { get; set; }
         public string account { get; set; }
         public string symbol { get; set; }
         public string side { get; set; }       //Buy Sell
@@ -69,8 +46,16 @@ namespace bit.Model
         public string ordStatus { get; set; }
         public int leavesQty { get; set; }   // 미체결량?
         public int cumQty { get; set; }      // 체결량?
+        public string text { get; set; }
         public string transactTime { get; set; }
         public string timestamp { get; set; }
+    }
+
+
+    public class user_margin
+    {
+        public int walletBalance { get; set; }
+        public int marginBalance { get; set; }
     }
 
 

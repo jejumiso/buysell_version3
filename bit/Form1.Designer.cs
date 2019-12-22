@@ -29,17 +29,15 @@
         private void InitializeComponent()
         {
             this.btn_Stop = new System.Windows.Forms.Button();
-            this.txtBox = new System.Windows.Forms.TextBox();
             this.btn_Start = new System.Windows.Forms.Button();
             this.txt_position = new System.Windows.Forms.TextBox();
-            this.txt_count = new System.Windows.Forms.Label();
-            this.txt_order = new System.Windows.Forms.TextBox();
-            this.btn_test1 = new System.Windows.Forms.Button();
+            this.btn_balance = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btn_Stop
             // 
-            this.btn_Stop.Location = new System.Drawing.Point(165, 465);
+            this.btn_Stop.Enabled = false;
+            this.btn_Stop.Location = new System.Drawing.Point(160, 170);
             this.btn_Stop.Name = "btn_Stop";
             this.btn_Stop.Size = new System.Drawing.Size(75, 30);
             this.btn_Stop.TabIndex = 1;
@@ -47,18 +45,9 @@
             this.btn_Stop.UseVisualStyleBackColor = true;
             this.btn_Stop.Click += new System.EventHandler(this.btn_Stop_Click);
             // 
-            // txtBox
-            // 
-            this.txtBox.Location = new System.Drawing.Point(12, 12);
-            this.txtBox.Multiline = true;
-            this.txtBox.Name = "txtBox";
-            this.txtBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtBox.Size = new System.Drawing.Size(282, 432);
-            this.txtBox.TabIndex = 2;
-            // 
             // btn_Start
             // 
-            this.btn_Start.Location = new System.Drawing.Point(56, 465);
+            this.btn_Start.Location = new System.Drawing.Point(51, 170);
             this.btn_Start.Name = "btn_Start";
             this.btn_Start.Size = new System.Drawing.Size(75, 30);
             this.btn_Start.TabIndex = 3;
@@ -68,55 +57,33 @@
             // 
             // txt_position
             // 
-            this.txt_position.Location = new System.Drawing.Point(331, 12);
+            this.txt_position.Location = new System.Drawing.Point(12, 12);
             this.txt_position.Multiline = true;
             this.txt_position.Name = "txt_position";
-            this.txt_position.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txt_position.Size = new System.Drawing.Size(392, 206);
-            this.txt_position.TabIndex = 4;
+            this.txt_position.Size = new System.Drawing.Size(427, 140);
+            this.txt_position.TabIndex = 21;
             // 
-            // txt_count
+            // btn_balance
             // 
-            this.txt_count.AutoSize = true;
-            this.txt_count.Location = new System.Drawing.Point(615, 474);
-            this.txt_count.Name = "txt_count";
-            this.txt_count.Size = new System.Drawing.Size(38, 12);
-            this.txt_count.TabIndex = 5;
-            this.txt_count.Text = "label1";
-            // 
-            // txt_order
-            // 
-            this.txt_order.Location = new System.Drawing.Point(331, 224);
-            this.txt_order.Multiline = true;
-            this.txt_order.Name = "txt_order";
-            this.txt_order.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txt_order.Size = new System.Drawing.Size(392, 220);
-            this.txt_order.TabIndex = 6;
-            // 
-            // btn_test1
-            // 
-            this.btn_test1.Location = new System.Drawing.Point(372, 465);
-            this.btn_test1.Name = "btn_test1";
-            this.btn_test1.Size = new System.Drawing.Size(140, 30);
-            this.btn_test1.TabIndex = 7;
-            this.btn_test1.Text = "테스트";
-            this.btn_test1.UseVisualStyleBackColor = true;
-            this.btn_test1.Click += new System.EventHandler(this.btn_test1_Click);
+            this.btn_balance.Location = new System.Drawing.Point(286, 170);
+            this.btn_balance.Name = "btn_balance";
+            this.btn_balance.Size = new System.Drawing.Size(75, 30);
+            this.btn_balance.TabIndex = 22;
+            this.btn_balance.Text = "잔고확인";
+            this.btn_balance.UseVisualStyleBackColor = true;
+            this.btn_balance.Click += new System.EventHandler(this.btn_balance_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(734, 510);
-            this.Controls.Add(this.btn_test1);
-            this.Controls.Add(this.txt_order);
-            this.Controls.Add(this.txt_count);
+            this.ClientSize = new System.Drawing.Size(457, 227);
+            this.Controls.Add(this.btn_balance);
             this.Controls.Add(this.txt_position);
             this.Controls.Add(this.btn_Start);
-            this.Controls.Add(this.txtBox);
             this.Controls.Add(this.btn_Stop);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "jejuairfarm";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -125,12 +92,9 @@
 
         #endregion
         private System.Windows.Forms.Button btn_Stop;
-        private System.Windows.Forms.TextBox txtBox;
         private System.Windows.Forms.Button btn_Start;
         private System.Windows.Forms.TextBox txt_position;
-        private System.Windows.Forms.Label txt_count;
-        private System.Windows.Forms.TextBox txt_order;
-        private System.Windows.Forms.Button btn_test1;
+        private System.Windows.Forms.Button btn_balance;
     }
 }
 
