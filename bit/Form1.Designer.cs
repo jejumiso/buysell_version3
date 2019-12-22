@@ -37,7 +37,7 @@
             // btn_Stop
             // 
             this.btn_Stop.Enabled = false;
-            this.btn_Stop.Location = new System.Drawing.Point(160, 170);
+            this.btn_Stop.Location = new System.Drawing.Point(152, 170);
             this.btn_Stop.Name = "btn_Stop";
             this.btn_Stop.Size = new System.Drawing.Size(75, 30);
             this.btn_Stop.TabIndex = 1;
@@ -60,12 +60,12 @@
             this.txt_position.Location = new System.Drawing.Point(12, 12);
             this.txt_position.Multiline = true;
             this.txt_position.Name = "txt_position";
-            this.txt_position.Size = new System.Drawing.Size(427, 140);
+            this.txt_position.Size = new System.Drawing.Size(391, 140);
             this.txt_position.TabIndex = 21;
             // 
             // btn_balance
             // 
-            this.btn_balance.Location = new System.Drawing.Point(286, 170);
+            this.btn_balance.Location = new System.Drawing.Point(259, 170);
             this.btn_balance.Name = "btn_balance";
             this.btn_balance.Size = new System.Drawing.Size(75, 30);
             this.btn_balance.TabIndex = 22;
@@ -77,7 +77,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(457, 227);
+            this.ClientSize = new System.Drawing.Size(457, 211);
             this.Controls.Add(this.btn_balance);
             this.Controls.Add(this.txt_position);
             this.Controls.Add(this.btn_Start);
