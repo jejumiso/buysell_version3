@@ -23,7 +23,7 @@ namespace BitMEX
         public DateTime Timestamp { get; set; }
     }
 
-    
+
 
 
     public class BitMEXApi
@@ -147,7 +147,7 @@ namespace BitMEX
 
 
 
-        public string GetOrders(string symbol, string filter ,int count, Boolean reverse,string text)
+        public string GetOrders(string symbol, string filter, int count, Boolean reverse, string text)
         {
             var param = new Dictionary<string, string>();
             param["symbol"] = symbol;
@@ -195,7 +195,7 @@ namespace BitMEX
         }
 
 
-        public string PostOrders(string symbol,string side,int orderQty,double price, string ordType)
+        public string PostOrders(string symbol, string side, int orderQty, double price, string ordType)
         {
             var param = new Dictionary<string, string>();
             param["symbol"] = symbol;
@@ -231,7 +231,7 @@ namespace BitMEX
             param["orderID"] = orderID;
             param["price"] = price.ToString();
             param["orderQty"] = orderQty.ToString();  //Buy Sell
-            
+
             return Query("PUT", "/order", param, true);
         }
 
@@ -250,15 +250,15 @@ namespace BitMEX
             return Query("DELETE", "/order/all", param, true, true);
         }
         public string DeleteAllOrders(string filter)
-        {            
+        {
             var param = new Dictionary<string, string>();
-            param["symbol"] = "XBTUSD";          
+            param["symbol"] = "XBTUSD";
             param["filter"] = filter;
             string resut = Query("DELETE", "/order/all", param, true);
             return resut;
         }
 
-        public string DeleteAllOrders(string filter,string text)
+        public string DeleteAllOrders(string filter, string text)
         {
             var param = new Dictionary<string, string>();
             param["text"] = text;
