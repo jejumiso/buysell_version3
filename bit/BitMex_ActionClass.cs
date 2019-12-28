@@ -19,8 +19,8 @@ namespace bit.BitMex_ActionClass
         BitMEXApi bitemex = new BitMEXApi(bitmexKey, bitmexSecret);
 
 
-        int no = 3000;
-        public void order_System3(bitemex_position bitemex_position ,double iniinitial_value,  int manual_Qty)
+        int no = 553;
+        public void order_System3(bitemex_position bitemex_position ,double iniinitial_value,  int mody_Qty1, int mody_Qty2)
         {
 
             //[1-1]  setting
@@ -36,213 +36,306 @@ namespace bit.BitMex_ActionClass
             int step9_Qty; double step9_spring; double _margin9;
             int step10_Qty; double step10_spring; double _margin10;
 
+            step1_Qty = 20; step1_spring = 3.0; _margin1 = 10.0;
+            step2_Qty = 22; step2_spring = 5.0; _margin2 = 12.0;
+            step3_Qty = 24; step3_spring = 8.0; _margin3 = 15.0;
+            step4_Qty = 26; step4_spring = 13.0; _margin4 = 20.0;
+            step5_Qty = 28; step5_spring = 66.0; _margin5 = 66.0;
+            step6_Qty = 55; step6_spring = 77.0; _margin6 = 77.0;
+            step7_Qty = 56; step7_spring = 100.0; _margin7 = 100.0;
+            step8_Qty = 57; step8_spring = 110.0; _margin8 = 110.0;
+            step9_Qty = 58; step9_spring = 120.0; _margin9 = 120.0;
+            step10_Qty = 59; step10_spring = 130.0; _margin10 = 130.0;
 
-            step1_Qty = 20; step1_spring = 3; _margin1 = 15.0;
-            step2_Qty = 22; step2_spring = 5; _margin2 = 22.0;
-            step3_Qty = 24; step3_spring = 8; _margin3 = 25.0;
-            step4_Qty = 26; step4_spring = 30.0; _margin4 = 40.0;
-            step5_Qty = 104; step5_spring = 35.0; _margin5 = 40.0;
-            step6_Qty = 105; step6_spring = 55.0; _margin6 = 60.0;
-            step7_Qty = 106; step7_spring = 80.0; _margin7 = 100.0;
-            step8_Qty = 107; step8_spring = 140.0; _margin8 = 160.0;
-            step9_Qty = 108; step9_spring = 180.0; _margin9 = 210.0;
-            step10_Qty = 109; step10_spring = 250.0; _margin10 = 250.0;
+            //step1_Qty = 5000; step1_spring = 50.0; _margin1 = 50.0;
+            //step2_Qty = 5000; step2_spring = 100.0; _margin2 = 80.0;
+            //step3_Qty = 5000; step3_spring = 180.0; _margin3 = 130.0;
+            //step4_Qty = 5000; step4_spring = 220.0; _margin4 = 180.0;
+            //step5_Qty = 5000; step5_spring = 300.0; _margin5 = 250.0;
+            //step6_Qty = 5000; step6_spring = 380.0; _margin6 = 300.0;
+            //step7_Qty = 5000; step7_spring = 460.0; _margin7 = 460.0;
+            //step8_Qty = 5000; step8_spring = 530.0; _margin8 = 530.0;
+            //step9_Qty = 5000; step9_spring = 600.0; _margin9 = 600.0;
+            //step10_Qty = 5000; step10_spring = 800.0; _margin10 = 800.0;
             #endregion
             //[1-2] setting
 
 
 
             //[2]
-            if (bitemex_position.currentQty == manual_Qty)
+            if (bitemex_position.currentQty + mody_Qty1 == mody_Qty2)  //mody_Qty2은 프로그램 최초 실행시 한번 설정되어 바뀌지 않음...
             {
                 //[2-1] 주문 삭제.
                 bitemex.DeleteAllOrders("{\"clOrdID\":\"Buy_" + (no - 1) + "\"}");
                 bitemex.DeleteAllOrders("{\"clOrdID\":\"Sell_" + (no - 1) + "\"}");
 
+                double price = 0;
 
                 //[2-2] 주문 넣기
                 List<bitmex_order> list_bitmex_order = new List<bitmex_order>();
                 bitmex_order _bitmex_order;
+
                 #region step1
-                _bitmex_order = new bitmex_order();
-                _bitmex_order.symbol = "XBTUSD";
-                _bitmex_order.side = "Buy";
-                _bitmex_order.clOrdID = "Buy_" + no.ToString();
-                _bitmex_order.orderQty = step1_Qty;
-                _bitmex_order.price = iniinitial_value - step1_spring;
-                _bitmex_order.ordType = "Limit";
-                list_bitmex_order.Add(_bitmex_order);
-                _bitmex_order = new bitmex_order();
-                _bitmex_order.symbol = "XBTUSD";
-                _bitmex_order.side = "Sell";
-                _bitmex_order.clOrdID = "Sell_" + no.ToString();
-                _bitmex_order.orderQty = step1_Qty;
-                _bitmex_order.price = iniinitial_value + step1_spring;
-                _bitmex_order.ordType = "Limit";
-                list_bitmex_order.Add(_bitmex_order);
+                price = iniinitial_value - step1_spring;
+                if (bitemex_position.currentQty <= 0 ||  (bitemex_position.currentQty > 0 && bitemex_position.marginCallPrice < price))
+                {
+                    _bitmex_order = new bitmex_order();
+                    _bitmex_order.symbol = "XBTUSD";
+                    _bitmex_order.side = "Buy";
+                    _bitmex_order.clOrdID = "Buy_" + no.ToString();
+                    _bitmex_order.orderQty = step1_Qty;
+                    _bitmex_order.price = price;
+                    _bitmex_order.ordType = "Limit";
+                    list_bitmex_order.Add(_bitmex_order);
+                }
+                price = iniinitial_value + step1_spring;
+                if (bitemex_position.currentQty >= 0 || (bitemex_position.currentQty < 0 && bitemex_position.marginCallPrice > price))
+                {
+                    _bitmex_order = new bitmex_order();
+                    _bitmex_order.symbol = "XBTUSD";
+                    _bitmex_order.side = "Sell";
+                    _bitmex_order.clOrdID = "Sell_" + no.ToString();
+                    _bitmex_order.orderQty = step1_Qty;
+                    _bitmex_order.price = price;
+                    _bitmex_order.ordType = "Limit";
+                    list_bitmex_order.Add(_bitmex_order);
+                }
                 #endregion
                 #region step2
-                _bitmex_order = new bitmex_order();
-                _bitmex_order.symbol = "XBTUSD";
-                _bitmex_order.side = "Buy";
-                _bitmex_order.clOrdID = "Buy_" + no.ToString();
-                _bitmex_order.orderQty = step2_Qty;
-                _bitmex_order.price = iniinitial_value - step2_spring;
-                _bitmex_order.ordType = "Limit";
-                list_bitmex_order.Add(_bitmex_order);
-                _bitmex_order = new bitmex_order();
-                _bitmex_order.symbol = "XBTUSD";
-                _bitmex_order.side = "Sell";
-                _bitmex_order.clOrdID = "Sell_" + no.ToString();
-                _bitmex_order.orderQty = step2_Qty;
-                _bitmex_order.price = iniinitial_value + step2_spring;
-                _bitmex_order.ordType = "Limit";
-                list_bitmex_order.Add(_bitmex_order);
+                price = iniinitial_value - step2_spring;
+                if (bitemex_position.currentQty <= 0 || (bitemex_position.currentQty > 0 && bitemex_position.marginCallPrice < price))
+                {
+                    _bitmex_order = new bitmex_order();
+                    _bitmex_order.symbol = "XBTUSD";
+                    _bitmex_order.side = "Buy";
+                    _bitmex_order.clOrdID = "Buy_" + no.ToString();
+                    _bitmex_order.orderQty = step2_Qty;
+                    _bitmex_order.price = price;
+                    _bitmex_order.ordType = "Limit";
+                    list_bitmex_order.Add(_bitmex_order);
+                }
+                price = iniinitial_value + step2_spring;
+                if (bitemex_position.currentQty >= 0 || (bitemex_position.currentQty < 0 && bitemex_position.marginCallPrice > price))
+                {
+                    _bitmex_order = new bitmex_order();
+                    _bitmex_order.symbol = "XBTUSD";
+                    _bitmex_order.side = "Sell";
+                    _bitmex_order.clOrdID = "Sell_" + no.ToString();
+                    _bitmex_order.orderQty = step2_Qty;
+                    _bitmex_order.price = price;
+                    _bitmex_order.ordType = "Limit";
+                    list_bitmex_order.Add(_bitmex_order);
+                }
                 #endregion
                 #region step3
-                _bitmex_order = new bitmex_order();
-                _bitmex_order.symbol = "XBTUSD";
-                _bitmex_order.side = "Buy";
-                _bitmex_order.clOrdID = "Buy_" + no.ToString();
-                _bitmex_order.orderQty = step3_Qty;
-                _bitmex_order.price = iniinitial_value - step3_spring;
-                _bitmex_order.ordType = "Limit";
-                list_bitmex_order.Add(_bitmex_order);
-                _bitmex_order = new bitmex_order();
-                _bitmex_order.symbol = "XBTUSD";
-                _bitmex_order.side = "Sell";
-                _bitmex_order.clOrdID = "Sell_" + no.ToString();
-                _bitmex_order.orderQty = step3_Qty;
-                _bitmex_order.price = iniinitial_value + step3_spring;
-                _bitmex_order.ordType = "Limit";
-                list_bitmex_order.Add(_bitmex_order);
+                price = iniinitial_value - step3_spring;
+                if (bitemex_position.currentQty <= 0 || (bitemex_position.currentQty > 0 && bitemex_position.marginCallPrice < price))
+                {
+                    _bitmex_order = new bitmex_order();
+                    _bitmex_order.symbol = "XBTUSD";
+                    _bitmex_order.side = "Buy";
+                    _bitmex_order.clOrdID = "Buy_" + no.ToString();
+                    _bitmex_order.orderQty = step3_Qty;
+                    _bitmex_order.price = price;
+                    _bitmex_order.ordType = "Limit";
+                    list_bitmex_order.Add(_bitmex_order);
+                }
+                price = iniinitial_value + step3_spring;
+                if (bitemex_position.currentQty >= 0 || (bitemex_position.currentQty < 0 && bitemex_position.marginCallPrice > price))
+                {
+                    _bitmex_order = new bitmex_order();
+                    _bitmex_order.symbol = "XBTUSD";
+                    _bitmex_order.side = "Sell";
+                    _bitmex_order.clOrdID = "Sell_" + no.ToString();
+                    _bitmex_order.orderQty = step3_Qty;
+                    _bitmex_order.price = price;
+                    _bitmex_order.ordType = "Limit";
+                    list_bitmex_order.Add(_bitmex_order);
+                }
                 #endregion
                 #region step4
-                _bitmex_order = new bitmex_order();
-                _bitmex_order.symbol = "XBTUSD";
-                _bitmex_order.side = "Buy";
-                _bitmex_order.clOrdID = "Buy_" + no.ToString();
-                _bitmex_order.orderQty = step4_Qty;
-                _bitmex_order.price = iniinitial_value - step4_spring;
-                _bitmex_order.ordType = "Limit";
-                list_bitmex_order.Add(_bitmex_order);
-                _bitmex_order = new bitmex_order();
-                _bitmex_order.symbol = "XBTUSD";
-                _bitmex_order.side = "Sell";
-                _bitmex_order.clOrdID = "Sell_" + no.ToString();
-                _bitmex_order.orderQty = step4_Qty;
-                _bitmex_order.price = iniinitial_value + step4_spring;
-                _bitmex_order.ordType = "Limit";
-                list_bitmex_order.Add(_bitmex_order);
+                price = iniinitial_value - step4_spring;
+                if (bitemex_position.currentQty <= 0 || (bitemex_position.currentQty > 0 && bitemex_position.marginCallPrice < price))
+                {
+                    _bitmex_order = new bitmex_order();
+                    _bitmex_order.symbol = "XBTUSD";
+                    _bitmex_order.side = "Buy";
+                    _bitmex_order.clOrdID = "Buy_" + no.ToString();
+                    _bitmex_order.orderQty = step4_Qty;
+                    _bitmex_order.price = price;
+                    _bitmex_order.ordType = "Limit";
+                    list_bitmex_order.Add(_bitmex_order);
+                }
+                price = iniinitial_value + step4_spring;
+                if (bitemex_position.currentQty >= 0 || (bitemex_position.currentQty < 0 && bitemex_position.marginCallPrice > price))
+                {
+                    _bitmex_order = new bitmex_order();
+                    _bitmex_order.symbol = "XBTUSD";
+                    _bitmex_order.side = "Sell";
+                    _bitmex_order.clOrdID = "Sell_" + no.ToString();
+                    _bitmex_order.orderQty = step4_Qty;
+                    _bitmex_order.price = price;
+                    _bitmex_order.ordType = "Limit";
+                    list_bitmex_order.Add(_bitmex_order);
+                }
                 #endregion
                 #region step5
-                _bitmex_order = new bitmex_order();
-                _bitmex_order.symbol = "XBTUSD";
-                _bitmex_order.side = "Buy";
-                _bitmex_order.clOrdID = "Buy_" + no.ToString();
-                _bitmex_order.orderQty = step5_Qty;
-                _bitmex_order.price = iniinitial_value - step5_spring;
-                _bitmex_order.ordType = "Limit";
-                list_bitmex_order.Add(_bitmex_order);
-                _bitmex_order = new bitmex_order();
-                _bitmex_order.symbol = "XBTUSD";
-                _bitmex_order.side = "Sell";
-                _bitmex_order.clOrdID = "Sell_" + no.ToString();
-                _bitmex_order.orderQty = step5_Qty;
-                _bitmex_order.price = iniinitial_value + step5_spring;
-                _bitmex_order.ordType = "Limit";
-                list_bitmex_order.Add(_bitmex_order);
+                price = iniinitial_value - step5_spring;
+                if (bitemex_position.currentQty <= 0 || (bitemex_position.currentQty > 0 && bitemex_position.marginCallPrice < price))
+                {
+                    _bitmex_order = new bitmex_order();
+                    _bitmex_order.symbol = "XBTUSD";
+                    _bitmex_order.side = "Buy";
+                    _bitmex_order.clOrdID = "Buy_" + no.ToString();
+                    _bitmex_order.orderQty = step5_Qty;
+                    _bitmex_order.price = price;
+                    _bitmex_order.ordType = "Limit";
+                    list_bitmex_order.Add(_bitmex_order);
+                }
+                price = iniinitial_value + step5_spring;
+                if (bitemex_position.currentQty >= 0 || (bitemex_position.currentQty < 0 && bitemex_position.marginCallPrice > price))
+                {
+                    _bitmex_order = new bitmex_order();
+                    _bitmex_order.symbol = "XBTUSD";
+                    _bitmex_order.side = "Sell";
+                    _bitmex_order.clOrdID = "Sell_" + no.ToString();
+                    _bitmex_order.orderQty = step5_Qty;
+                    _bitmex_order.price = price;
+                    _bitmex_order.ordType = "Limit";
+                    list_bitmex_order.Add(_bitmex_order);
+                }
                 #endregion
                 #region step6
-                _bitmex_order = new bitmex_order();
-                _bitmex_order.symbol = "XBTUSD";
-                _bitmex_order.side = "Buy";
-                _bitmex_order.clOrdID = "Buy_" + no.ToString();
-                _bitmex_order.orderQty = step6_Qty;
-                _bitmex_order.price = iniinitial_value - step6_spring;
-                _bitmex_order.ordType = "Limit";
-                list_bitmex_order.Add(_bitmex_order);
-                _bitmex_order = new bitmex_order();
-                _bitmex_order.symbol = "XBTUSD";
-                _bitmex_order.side = "Sell";
-                _bitmex_order.clOrdID = "Sell_" + no.ToString();
-                _bitmex_order.orderQty = step6_Qty;
-                _bitmex_order.price = iniinitial_value + step6_spring;
-                _bitmex_order.ordType = "Limit";
-                list_bitmex_order.Add(_bitmex_order);
+                price = iniinitial_value - step6_spring;
+                if (bitemex_position.currentQty <= 0 || (bitemex_position.currentQty > 0 && bitemex_position.marginCallPrice < price))
+                {
+                    _bitmex_order = new bitmex_order();
+                    _bitmex_order.symbol = "XBTUSD";
+                    _bitmex_order.side = "Buy";
+                    _bitmex_order.clOrdID = "Buy_" + no.ToString();
+                    _bitmex_order.orderQty = step6_Qty;
+                    _bitmex_order.price = price;
+                    _bitmex_order.ordType = "Limit";
+                    list_bitmex_order.Add(_bitmex_order);
+                }
+                price = iniinitial_value + step6_spring;
+                if (bitemex_position.currentQty >= 0 || (bitemex_position.currentQty < 0 && bitemex_position.marginCallPrice > price))
+                {
+                    _bitmex_order = new bitmex_order();
+                    _bitmex_order.symbol = "XBTUSD";
+                    _bitmex_order.side = "Sell";
+                    _bitmex_order.clOrdID = "Sell_" + no.ToString();
+                    _bitmex_order.orderQty = step6_Qty;
+                    _bitmex_order.price = price;
+                    _bitmex_order.ordType = "Limit";
+                    list_bitmex_order.Add(_bitmex_order);
+                }
                 #endregion
                 #region step7
-                _bitmex_order = new bitmex_order();
-                _bitmex_order.symbol = "XBTUSD";
-                _bitmex_order.side = "Buy";
-                _bitmex_order.clOrdID = "Buy_" + no.ToString();
-                _bitmex_order.orderQty = step7_Qty;
-                _bitmex_order.price = iniinitial_value - step7_spring;
-                _bitmex_order.ordType = "Limit";
-                list_bitmex_order.Add(_bitmex_order);
-                _bitmex_order = new bitmex_order();
-                _bitmex_order.symbol = "XBTUSD";
-                _bitmex_order.side = "Sell";
-                _bitmex_order.clOrdID = "Sell_" + no.ToString();
-                _bitmex_order.orderQty = step7_Qty;
-                _bitmex_order.price = iniinitial_value + step7_spring;
-                _bitmex_order.ordType = "Limit";
-                list_bitmex_order.Add(_bitmex_order);
+                price = iniinitial_value - step7_spring;
+                if (bitemex_position.currentQty <= 0 || (bitemex_position.currentQty > 0 && bitemex_position.marginCallPrice < price))
+                {
+                    _bitmex_order = new bitmex_order();
+                    _bitmex_order.symbol = "XBTUSD";
+                    _bitmex_order.side = "Buy";
+                    _bitmex_order.clOrdID = "Buy_" + no.ToString();
+                    _bitmex_order.orderQty = step7_Qty;
+                    _bitmex_order.price = price;
+                    _bitmex_order.ordType = "Limit";
+                    list_bitmex_order.Add(_bitmex_order);
+                }
+                price = iniinitial_value + step7_spring;
+                if (bitemex_position.currentQty >= 0 || (bitemex_position.currentQty < 0 && bitemex_position.marginCallPrice > price))
+                {
+                    _bitmex_order = new bitmex_order();
+                    _bitmex_order.symbol = "XBTUSD";
+                    _bitmex_order.side = "Sell";
+                    _bitmex_order.clOrdID = "Sell_" + no.ToString();
+                    _bitmex_order.orderQty = step7_Qty;
+                    _bitmex_order.price = price;
+                    _bitmex_order.ordType = "Limit";
+                    list_bitmex_order.Add(_bitmex_order);
+                }
                 #endregion
                 #region step8
-                _bitmex_order = new bitmex_order();
-                _bitmex_order.symbol = "XBTUSD";
-                _bitmex_order.side = "Buy";
-                _bitmex_order.clOrdID = "Buy_" + no.ToString();
-                _bitmex_order.orderQty = step8_Qty;
-                _bitmex_order.price = iniinitial_value - step8_spring;
-                _bitmex_order.ordType = "Limit";
-                list_bitmex_order.Add(_bitmex_order);
-                _bitmex_order = new bitmex_order();
-                _bitmex_order.symbol = "XBTUSD";
-                _bitmex_order.side = "Sell";
-                _bitmex_order.clOrdID = "Sell_" + no.ToString();
-                _bitmex_order.orderQty = step8_Qty;
-                _bitmex_order.price = iniinitial_value + step8_spring;
-                _bitmex_order.ordType = "Limit";
-                list_bitmex_order.Add(_bitmex_order);
+                price = iniinitial_value - step8_spring;
+                if (bitemex_position.currentQty <= 0 || (bitemex_position.currentQty > 0 && bitemex_position.marginCallPrice < price))
+                {
+                    _bitmex_order = new bitmex_order();
+                    _bitmex_order.symbol = "XBTUSD";
+                    _bitmex_order.side = "Buy";
+                    _bitmex_order.clOrdID = "Buy_" + no.ToString();
+                    _bitmex_order.orderQty = step8_Qty;
+                    _bitmex_order.price = price;
+                    _bitmex_order.ordType = "Limit";
+                    list_bitmex_order.Add(_bitmex_order);
+                }
+                price = iniinitial_value + step8_spring;
+                if (bitemex_position.currentQty >= 0 || (bitemex_position.currentQty < 0 && bitemex_position.marginCallPrice > price))
+                {
+                    _bitmex_order = new bitmex_order();
+                    _bitmex_order.symbol = "XBTUSD";
+                    _bitmex_order.side = "Sell";
+                    _bitmex_order.clOrdID = "Sell_" + no.ToString();
+                    _bitmex_order.orderQty = step8_Qty;
+                    _bitmex_order.price = price;
+                    _bitmex_order.ordType = "Limit";
+                    list_bitmex_order.Add(_bitmex_order);
+                }
                 #endregion
                 #region step9
-                _bitmex_order = new bitmex_order();
-                _bitmex_order.symbol = "XBTUSD";
-                _bitmex_order.side = "Buy";
-                _bitmex_order.clOrdID = "Buy_" + no.ToString();
-                _bitmex_order.orderQty = step9_Qty;
-                _bitmex_order.price = iniinitial_value - step9_spring;
-                _bitmex_order.ordType = "Limit";
-                list_bitmex_order.Add(_bitmex_order);
-                _bitmex_order = new bitmex_order();
-                _bitmex_order.symbol = "XBTUSD";
-                _bitmex_order.side = "Sell";
-                _bitmex_order.clOrdID = "Sell_" + no.ToString();
-                _bitmex_order.orderQty = step9_Qty;
-                _bitmex_order.price = iniinitial_value + step9_spring;
-                _bitmex_order.ordType = "Limit";
-                list_bitmex_order.Add(_bitmex_order);
+                price = iniinitial_value - step9_spring;
+                if (bitemex_position.currentQty <= 0 || (bitemex_position.currentQty > 0 && bitemex_position.marginCallPrice < price))
+                {
+                    _bitmex_order = new bitmex_order();
+                    _bitmex_order.symbol = "XBTUSD";
+                    _bitmex_order.side = "Buy";
+                    _bitmex_order.clOrdID = "Buy_" + no.ToString();
+                    _bitmex_order.orderQty = step9_Qty;
+                    _bitmex_order.price = price;
+                    _bitmex_order.ordType = "Limit";
+                    list_bitmex_order.Add(_bitmex_order);
+                }
+                price = iniinitial_value + step9_spring;
+                if (bitemex_position.currentQty >= 0 || (bitemex_position.currentQty < 0 && bitemex_position.marginCallPrice > price))
+                {
+                    _bitmex_order = new bitmex_order();
+                    _bitmex_order.symbol = "XBTUSD";
+                    _bitmex_order.side = "Sell";
+                    _bitmex_order.clOrdID = "Sell_" + no.ToString();
+                    _bitmex_order.orderQty = step9_Qty;
+                    _bitmex_order.price = price;
+                    _bitmex_order.ordType = "Limit";
+                    list_bitmex_order.Add(_bitmex_order);
+                }
                 #endregion
                 #region step10
-                _bitmex_order = new bitmex_order();
-                _bitmex_order.symbol = "XBTUSD";
-                _bitmex_order.side = "Buy";
-                _bitmex_order.clOrdID = "Buy_" + no.ToString();
-                _bitmex_order.orderQty = step10_Qty;
-                _bitmex_order.price = iniinitial_value - step10_spring;
-                _bitmex_order.ordType = "Limit";
-                list_bitmex_order.Add(_bitmex_order);
-                _bitmex_order = new bitmex_order();
-                _bitmex_order.symbol = "XBTUSD";
-                _bitmex_order.side = "Sell";
-                _bitmex_order.clOrdID = "Sell_" + no.ToString();
-                _bitmex_order.orderQty = step10_Qty;
-                _bitmex_order.price = iniinitial_value + step10_spring;
-                _bitmex_order.ordType = "Limit";
-                list_bitmex_order.Add(_bitmex_order);
+                price = iniinitial_value - step10_spring;
+                if (bitemex_position.currentQty <= 0 || (bitemex_position.currentQty > 0 && bitemex_position.marginCallPrice < price))
+                {
+                    _bitmex_order = new bitmex_order();
+                    _bitmex_order.symbol = "XBTUSD";
+                    _bitmex_order.side = "Buy";
+                    _bitmex_order.clOrdID = "Buy_" + no.ToString();
+                    _bitmex_order.orderQty = step10_Qty;
+                    _bitmex_order.price = price;
+                    _bitmex_order.ordType = "Limit";
+                    list_bitmex_order.Add(_bitmex_order);
+                }
+                price = iniinitial_value + step10_spring;
+                if (bitemex_position.currentQty >= 0 || (bitemex_position.currentQty < 0 && bitemex_position.marginCallPrice > price))
+                {
+                    _bitmex_order = new bitmex_order();
+                    _bitmex_order.symbol = "XBTUSD";
+                    _bitmex_order.side = "Sell";
+                    _bitmex_order.clOrdID = "Sell_" + no.ToString();
+                    _bitmex_order.orderQty = step10_Qty;
+                    _bitmex_order.price = price;
+                    _bitmex_order.ordType = "Limit";
+                    list_bitmex_order.Add(_bitmex_order);
+                }
                 #endregion
+
                 string _result = bitemex.PostOrders_bulk(list_bitmex_order);
                 no++;
             }
@@ -250,7 +343,8 @@ namespace bit.BitMex_ActionClass
             {
                 string search_recent_clOrdID = "";
                 //string search_recent_side = "";  //이거는 활용 안했음=> 초급등후 초급락하면 position이 buy여도 sell도 같이 체결이 된 상태 일수도 있어서...
-                if ((bitemex_position.currentQty- manual_Qty) > 0)
+                int _chk = (bitemex_position.currentQty + mody_Qty1) - mody_Qty2;
+                if (_chk > 0)
                 {
                     bitemex.DeleteAllOrders("{\"clOrdID\":\"Sell_" + (no - 1) + "\"}");
                     search_recent_clOrdID = "Buy_" + (no - 1);

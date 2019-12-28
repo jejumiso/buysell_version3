@@ -51,7 +51,8 @@ namespace bit
         int timeloop = 3;  //고정값
         int pre_currentQty = -1;
         double pre_avgCostPrice = -1;
-        int manual_Qty = 0;
+        int mody_Qty1 = 0;  // 직접 주문 넣은거의 주문 갯수
+        int mody_Qty2 = 0;  // 최초 한번 값 구하고 바뀌지 않음  : 0으로 계속 만들기 귀찮아서 만든거임
         private void Auto_Trad_Play()
         {
 
@@ -61,84 +62,88 @@ namespace bit
             //[2]
             if (return_position_result)   //postion불러오기를 성공 할시...
             {
-
-                #region 직접 주문 넣은거에 대해서 ...
-                if (pre_avgCostPrice == -1)
-                {
-                    string filter = "";
-                    string json_result = "";
-                    List<bitmex_order> recent_orders;
-                    //[1] 수기로 주문 넣은것에 대해서 체크
-                    filter = "{\"orderID\":\"e770c1dd-e685-8409-e2da-3ca46657fa21\"}";
-                    json_result = bitemex.GetOrders("XBTUSD", filter, 1, true, "");
-                    recent_orders = new List<bitmex_order>();
-                    recent_orders = JsonConvert.DeserializeObject<List<bitmex_order>>(json_result);
-                    if (recent_orders.Count() == 1)
-                    {
-                        if (recent_orders.FirstOrDefault().side == "Sell")
-                        {
-                            manual_Qty += recent_orders.FirstOrDefault().orderQty - recent_orders.FirstOrDefault().cumQty;
-                        }
-                        else if (recent_orders.FirstOrDefault().side == "Buy")
-                        {
-                            manual_Qty += -(recent_orders.FirstOrDefault().orderQty - recent_orders.FirstOrDefault().cumQty);
-                        }
-
-                    }
-                    //[2] [1]하고 같은거
-                    filter = "{\"orderID\":\"356b69ae-8000-06cf-7245-d8abc3df6070\"}";
-                    json_result = bitemex.GetOrders("XBTUSD", filter, 1, true, "");
-                    recent_orders = new List<bitmex_order>();
-                    recent_orders = JsonConvert.DeserializeObject<List<bitmex_order>>(json_result);
-                    if (recent_orders.Count() == 1)
-                    {
-                        if (recent_orders.FirstOrDefault().side == "Sell")
-                        {
-                            manual_Qty += recent_orders.FirstOrDefault().orderQty - recent_orders.FirstOrDefault().cumQty;
-                        }
-                        else if (recent_orders.FirstOrDefault().side == "Buy")
-                        {
-                            manual_Qty += -(recent_orders.FirstOrDefault().orderQty - recent_orders.FirstOrDefault().cumQty);
-                        }
-                    }
-                    //[2] [1]하고 같은거
-                    filter = "{\"orderID\":\"0291edab-ddf9-8c0b-e3aa-68dd90bd2b56\"}";
-                    json_result = bitemex.GetOrders("XBTUSD", filter, 1, true, "");
-                    recent_orders = new List<bitmex_order>();
-                    recent_orders = JsonConvert.DeserializeObject<List<bitmex_order>>(json_result);
-                    if (recent_orders.Count() == 1)
-                    {
-                        if (recent_orders.FirstOrDefault().side == "Sell")
-                        {
-                            manual_Qty += recent_orders.FirstOrDefault().orderQty - recent_orders.FirstOrDefault().cumQty;
-                        }
-                        else if (recent_orders.FirstOrDefault().side == "Buy")
-                        {
-                            manual_Qty += -(recent_orders.FirstOrDefault().orderQty - recent_orders.FirstOrDefault().cumQty);
-                        }
-                    }
-                    //[2] [1]하고 같은거
-                    filter = "{\"orderID\":\"0c7ccf62-ce18-a46a-7236-013570369189\"}";
-                    json_result = bitemex.GetOrders("XBTUSD", filter, 1, true, "");
-                    recent_orders = new List<bitmex_order>();
-                    recent_orders = JsonConvert.DeserializeObject<List<bitmex_order>>(json_result);
-                    if (recent_orders.Count() == 1)
-                    {
-                        if (recent_orders.FirstOrDefault().side == "Sell")
-                        {
-                            manual_Qty += recent_orders.FirstOrDefault().orderQty - recent_orders.FirstOrDefault().cumQty;
-                        }
-                        else if (recent_orders.FirstOrDefault().side == "Buy")
-                        {
-                            manual_Qty += -(recent_orders.FirstOrDefault().orderQty - recent_orders.FirstOrDefault().cumQty);
-                        }
-                    }
-                }
-                #endregion
-
-
                 if (pre_currentQty != bitemex_position.currentQty || pre_avgCostPrice != bitemex_position.avgCostPrice)
                 {
+
+                    #region 직접 주문 넣은거에 대해서 ...
+                    if (true)
+                    {
+                        string filter = "";
+                        string json_result = "";
+                        List<bitmex_order> recent_orders;
+                        //[1] 수기로 주문 넣은것에 대해서 체크
+                        filter = "{\"orderID\":\"6d44f1a8-666f-163c-abc6-536408f6f0f7\"}";
+                        json_result = bitemex.GetOrders("XBTUSD", filter, 1, true, "");
+                        recent_orders = new List<bitmex_order>();
+                        recent_orders = JsonConvert.DeserializeObject<List<bitmex_order>>(json_result);
+                        if (recent_orders.Count() == 1)
+                        {
+                            if (recent_orders.FirstOrDefault().side == "Sell")
+                            {
+                                mody_Qty1 += recent_orders.FirstOrDefault().orderQty - recent_orders.FirstOrDefault().cumQty;
+                            }
+                            else if (recent_orders.FirstOrDefault().side == "Buy")
+                            {
+                                mody_Qty1 += -(recent_orders.FirstOrDefault().orderQty - recent_orders.FirstOrDefault().cumQty);
+                            }
+
+                        }
+                        //[2] [1]하고 같은거
+                        filter = "{\"orderID\":\"c9c236d8-57e5-2c29-afaa-031dad6f75ad\"}";
+                        json_result = bitemex.GetOrders("XBTUSD", filter, 1, true, "");
+                        recent_orders = new List<bitmex_order>();
+                        recent_orders = JsonConvert.DeserializeObject<List<bitmex_order>>(json_result);
+                        if (recent_orders.Count() == 1)
+                        {
+                            if (recent_orders.FirstOrDefault().side == "Sell")
+                            {
+                                mody_Qty1 += recent_orders.FirstOrDefault().orderQty - recent_orders.FirstOrDefault().cumQty;
+                            }
+                            else if (recent_orders.FirstOrDefault().side == "Buy")
+                            {
+                                mody_Qty1 += -(recent_orders.FirstOrDefault().orderQty - recent_orders.FirstOrDefault().cumQty);
+                            }
+                        }
+                        //[2] [1]하고 같은거
+                        filter = "{\"orderID\":\"b8444825-f9f6-edfd-af56-3c8b8534d96a\"}";
+                        json_result = bitemex.GetOrders("XBTUSD", filter, 1, true, "");
+                        recent_orders = new List<bitmex_order>();
+                        recent_orders = JsonConvert.DeserializeObject<List<bitmex_order>>(json_result);
+                        if (recent_orders.Count() == 1)
+                        {
+                            if (recent_orders.FirstOrDefault().side == "Sell")
+                            {
+                                mody_Qty1 += recent_orders.FirstOrDefault().orderQty - recent_orders.FirstOrDefault().cumQty;
+                            }
+                            else if (recent_orders.FirstOrDefault().side == "Buy")
+                            {
+                                mody_Qty1 += -(recent_orders.FirstOrDefault().orderQty - recent_orders.FirstOrDefault().cumQty);
+                            }
+                        }
+                        //[2] [1]하고 같은거
+                        filter = "{\"orderID\":\"b1c40b33-e822-fa28-868e-558b7637fa0c\"}";
+                        json_result = bitemex.GetOrders("XBTUSD", filter, 1, true, "");
+                        recent_orders = new List<bitmex_order>();
+                        recent_orders = JsonConvert.DeserializeObject<List<bitmex_order>>(json_result);
+                        if (recent_orders.Count() == 1)
+                        {
+                            if (recent_orders.FirstOrDefault().side == "Sell")
+                            {
+                                mody_Qty1 += recent_orders.FirstOrDefault().orderQty - recent_orders.FirstOrDefault().cumQty;
+                            }
+                            else if (recent_orders.FirstOrDefault().side == "Buy")
+                            {
+                                mody_Qty1 += -(recent_orders.FirstOrDefault().orderQty - recent_orders.FirstOrDefault().cumQty);
+                            }
+                        }
+                    }
+                    if (pre_avgCostPrice == -1)
+                    {
+                        mody_Qty2 = bitemex_position.currentQty +  mody_Qty1;   //이 차이는 항상 있는 거임.. 최초에 1번 구하면 바뀌지 않음..
+                    }
+
+                    #endregion
+
 
                     //[-]
                     bitmex_Get_bucketed_2();
@@ -147,11 +152,10 @@ namespace bit
                     pre_currentQty = bitemex_position.currentQty;
                     pre_avgCostPrice = (double)bitemex_position.avgCostPrice;
                     //[1]
-                    double iniinitial_value = (btmex_Bucketeds[1].open + btmex_Bucketeds[1].close)/2;
+                    double iniinitial_value = (btmex_Bucketeds[2].open + btmex_Bucketeds[1].close)/2;
                     iniinitial_value = Math.Ceiling(iniinitial_value * 2) / 2;
                     //[2]
-                    double mody_Qty = manual_Qty;
-                    bitmex_ActionClass.order_System3( bitemex_position, iniinitial_value, manual_Qty);
+                    bitmex_ActionClass.order_System3( bitemex_position, iniinitial_value, mody_Qty1, mody_Qty2);
 
                 }
                 else
@@ -181,7 +185,7 @@ namespace bit
             try
             {
                 /// [1] 봉 얻어오기
-                var result_bucketed = bitemex.bitmex_Get_bucketed("1m", true, "XBTUSD", 3, true);
+                var result_bucketed = bitemex.bitmex_Get_bucketed("1h", true, "XBTUSD", 3, true);
                 List<bitmex_bucketed> bucketeds = new List<bitmex_bucketed>();
                 btmex_Bucketeds = JsonConvert.DeserializeObject<List<bitmex_bucketed>>(result_bucketed);
             }
@@ -198,7 +202,7 @@ namespace bit
             timer1.Enabled = false;
             pre_currentQty = -1;
             pre_avgCostPrice = -1;
-            manual_Qty = 0;
+            mody_Qty1 = 0;
             txt_position.AppendText("\r\n타이머가 중지 되었습니다.");
         }
 
