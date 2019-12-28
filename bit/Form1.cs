@@ -19,9 +19,9 @@ namespace bit
     public partial class Form1 : Form
     {
 
-        // jejuairfarm
-        private static string bitmexKey = "1jLqib5tAmDF29DBb8M9292R";
-        private static string bitmexSecret = "aI2c215XvsqSa-XkAyP83CmJnPM07Cuw-ysbRYG7pn8BFEHi";
+        // hyunjaeyoung3414
+        private static string bitmexKey = "Qf1pbicR3rKKlQ0MCc6bDG8-";
+        private static string bitmexSecret = "xrUfymLnQnJ67CP5jxVr391owecZf0vQUKyjgRG0d9dXxbP-";
 
         // [2]
         BitMEXApi bitemex = new BitMEXApi(bitmexKey, bitmexSecret);
@@ -185,7 +185,7 @@ namespace bit
             try
             {
                 /// [1] 봉 얻어오기
-                var result_bucketed = bitemex.bitmex_Get_bucketed("1h", true, "XBTUSD", 3, true);
+                var result_bucketed = bitemex.bitmex_Get_bucketed("5m", true, "XBTUSD", 3, true);
                 List<bitmex_bucketed> bucketeds = new List<bitmex_bucketed>();
                 btmex_Bucketeds = JsonConvert.DeserializeObject<List<bitmex_bucketed>>(result_bucketed);
             }

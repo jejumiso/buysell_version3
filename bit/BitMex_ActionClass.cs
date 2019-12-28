@@ -11,9 +11,9 @@ namespace bit.BitMex_ActionClass
 {
     public class BitMex_ActionClass
     {
-        // jejuairfarm
-        private static string bitmexKey = "1jLqib5tAmDF29DBb8M9292R";
-        private static string bitmexSecret = "aI2c215XvsqSa-XkAyP83CmJnPM07Cuw-ysbRYG7pn8BFEHi";
+        // hyunjaeyoung3414
+        private static string bitmexKey = "Qf1pbicR3rKKlQ0MCc6bDG8-";
+        private static string bitmexSecret = "xrUfymLnQnJ67CP5jxVr391owecZf0vQUKyjgRG0d9dXxbP-";
 
 
         BitMEXApi bitemex = new BitMEXApi(bitmexKey, bitmexSecret);
@@ -36,16 +36,16 @@ namespace bit.BitMex_ActionClass
             int step9_Qty; double step9_spring; double _margin9;
             int step10_Qty; double step10_spring; double _margin10;
 
-            step1_Qty = 20; step1_spring = 3.0; _margin1 = 10.0;
-            step2_Qty = 22; step2_spring = 5.0; _margin2 = 12.0;
-            step3_Qty = 24; step3_spring = 8.0; _margin3 = 15.0;
-            step4_Qty = 26; step4_spring = 13.0; _margin4 = 20.0;
-            step5_Qty = 28; step5_spring = 66.0; _margin5 = 66.0;
-            step6_Qty = 55; step6_spring = 77.0; _margin6 = 77.0;
-            step7_Qty = 56; step7_spring = 100.0; _margin7 = 100.0;
-            step8_Qty = 57; step8_spring = 110.0; _margin8 = 110.0;
-            step9_Qty = 58; step9_spring = 120.0; _margin9 = 120.0;
-            step10_Qty = 59; step10_spring = 130.0; _margin10 = 130.0;
+            step1_Qty = 200; step1_spring = 10.0; _margin1 = 6.0;
+            step2_Qty = 205; step2_spring = 15.0; _margin2 = 11.0;
+            step3_Qty = 207; step3_spring = 25.0; _margin3 = 21.0;
+            step4_Qty = 209; step4_spring = 50.0; _margin4 = 46.0;
+            step5_Qty = 210; step5_spring = 70.0; _margin5 = 66.0;
+            step6_Qty = 212; step6_spring = 77.0; _margin6 = 73.0;
+            step7_Qty = 214; step7_spring = 100.0; _margin7 = 73.0;
+            step8_Qty = 216; step8_spring = 110.0; _margin8 = 73.0;
+            step9_Qty = 217; step9_spring = 120.0; _margin9 = 73.0;
+            step10_Qty = 220; step10_spring = 130.0; _margin10 = 73.0;
 
             //step1_Qty = 5000; step1_spring = 50.0; _margin1 = 50.0;
             //step2_Qty = 5000; step2_spring = 100.0; _margin2 = 80.0;
