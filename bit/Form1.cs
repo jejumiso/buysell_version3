@@ -66,7 +66,7 @@ namespace bit
                 {
 
                     #region 직접 주문 넣은거에 대해서 ...
-                    if (true)
+                    if (false)
                     {
                         string filter = "";
                         string json_result = "";

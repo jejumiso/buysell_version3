@@ -19,7 +19,7 @@ namespace bit.BitMex_ActionClass
         BitMEXApi bitemex = new BitMEXApi(bitmexKey, bitmexSecret);
 
 
-        int no = 553;
+        int no = 5000;
         public void order_System3(bitemex_position bitemex_position ,double iniinitial_value,  int mody_Qty1, int mody_Qty2)
         {
 
