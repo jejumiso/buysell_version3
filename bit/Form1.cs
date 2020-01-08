@@ -169,7 +169,7 @@ namespace bit
 
         private void btn_Start_Click_1(object sender, EventArgs e)
         {
-            btn_Start.Enabled = false;
+              btn_Start.Enabled = false;
             btn_Stop.Enabled = true;
 
             Auto_Trad_Play();
