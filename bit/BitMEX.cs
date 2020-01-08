@@ -235,21 +235,22 @@ namespace BitMEX
             return Query("PUT", "/order", param, true);
         }
 
-        public string DeleteOrders()
+
+
+
+        public string DeleteOrders_ByID(string orderID, string text)
         {
             var param = new Dictionary<string, string>();
-            param["orderID"] = "de709f12-2f24-9a36-b047-ab0ff090f0bb";
-            param["text"] = "cancel order by ID";
+            param["orderID"] = orderID;
+            param["text"] = text;
             return Query("DELETE", "/order", param, true, true);
         }
         public string DeleteAllOrders()
         {
             var param = new Dictionary<string, string>();
-            //param["orderID"] = "de709f12-2f24-9a36-b047-ab0ff090f0bb";
-            //param["text"] = "cancel order by ID";
             return Query("DELETE", "/order/all", param, true, true);
         }
-        public string DeleteAllOrders(string filter)
+        public string DeleteAllOrders_ByFilter(string filter)
         {
             var param = new Dictionary<string, string>();
             param["symbol"] = "XBTUSD";
