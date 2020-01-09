@@ -48,12 +48,10 @@ namespace bit
             Auto_Trad_Play();
         }
 
-        int timeloop = 10;  //고정값
+        int timeloop = 4;  //고정값
         int pre_currentQty = -1;
         double pre_avgCostPrice = -1;
         //double iniinitial_value = 0.0;
-        //int mody_Qty1 = 0;  // 직접 주문 넣은거의 주문 갯수
-        //int mody_Qty2 = 0;  // 최초 한번 값 구하고 바뀌지 않음  : 0으로 계속 만들기 귀찮아서 만든거임
         private void Auto_Trad_Play()
         {
 
@@ -79,7 +77,7 @@ namespace bit
                         double now_close = btmex_Bucketeds[0].close;
                         //[2]
                         //bitmex_ActionClass.order_System3(bitemex_position, iniinitial_value, now_close);
-                        bitmex_ActionClass.order_System2(bitemex_position, now_close);
+                        order_System2(now_close);
                     }
                 }
                 else
@@ -87,6 +85,413 @@ namespace bit
                     //포지션의 변화가 없으므로 empty
                 }
             }
+        }
+
+        List<bitmex_order> pre_recent_orders;
+        double iniinitial_value = 1000;
+        public void order_System2(double now_close)
+        {
+
+
+
+            //[1] 주문 내역 불러오기
+            var json_result = bitemex.GetOrders("XBTUSD", "{\"ordStatus\":\"New\"}", 100, true, "");
+            List<bitmex_order> recent_orders = JsonConvert.DeserializeObject<List<bitmex_order>>(json_result);
+            if (pre_recent_orders == null && recent_orders.Count() > 0)
+            {
+                pre_recent_orders = new List<bitmex_order>();
+                pre_recent_orders = recent_orders;
+            }
+            
+
+            //[2-1] setting
+            int step_Qty; double step_spring; double _margin;
+            step_Qty = 60; step_spring = 5.0; _margin = 7.0;  //good
+            step_Qty = 300; step_spring = 6.0; _margin = 10.0;
+            //[2-2] setting2
+            if (true)
+            {
+                iniinitial_value = 1000;
+                int step_skip = Math.Abs(Convert.ToInt32(Math.Truncate((now_close - iniinitial_value) / step_spring))); // 7010 - 7000 = 10  => skip:2
+                iniinitial_value = iniinitial_value + (step_skip * step_spring);
+            }
+            else
+            {
+                //if (bitemex_position.currentQty > 0)
+                //{
+                //    iniinitial_value = recent_orders.Where(p => p.side == "Sell" && p.text == "Trad").OrderBy(p => p.price).FirstOrDefault().price - _margin;
+                //}
+                //else if (bitemex_position.currentQty < 0)
+                //{
+
+                //}
+
+                //if (recent_orders.Where(p => p.side == "Buy" && p.text == "Trad").Count() > 0)
+                //{
+                //    iniinitial_value = recent_orders.Where(p => p.side == "Buy" && p.text == "Trad").OrderByDescending(p => p.price).FirstOrDefault().price + _margin;
+                //}
+                //else if (recent_orders.Where(p => p.side == "Sell" && p.text == "Trad").Count() > 0)
+                //{
+                    
+                //}
+
+            }
+            
+            
+
+            //[3] 주문 넣기
+            List<bitmex_order> list_bitmex_order = new List<bitmex_order>();
+            bitmex_order _bitmex_order;
+            
+            for (int i = 0; i < 20; i++)
+            {
+                double price = 0;
+                //[4-1] Buy    
+                price = iniinitial_value -  (i + 1) * step_spring;
+                // 조건 :  주문 넣은게 없고 / 반대 매매가 없고 /  청산조건에 걸리지 않아야함.
+                if (recent_orders.Where(p => p.side == "Buy" && p.text == "Trad" && p.price == price).Count() == 0)
+                {
+                    if (recent_orders.Where(p => p.side == "Sell" && p.text == "End" && p.price == price + _margin).Count() == 0)
+                    {
+                        if (bitemex_position.currentQty <= 0 || price > bitemex_position.marginCallPrice)
+                        {
+                            _bitmex_order = new bitmex_order();
+                            _bitmex_order.symbol = "XBTUSD";
+                            _bitmex_order.side = "Buy";
+                            _bitmex_order.orderQty = step_Qty;
+                            _bitmex_order.price = price;
+                            _bitmex_order.ordType = "Limit";
+                            _bitmex_order.text = "Trad";
+                            list_bitmex_order.Add(_bitmex_order);
+                        }
+                    }
+                }
+
+
+                //[4-2] Sell 
+                price = iniinitial_value + (i + 1) * step_spring;
+                // 조건 :  주문 넣은게 없고 / 반대 매매가 없고 /  청산조건에 걸리지 않아야함.
+                if (recent_orders.Where(p => p.side == "Sell" && p.text == "Trad" && p.price == price).Count() == 0)
+                {
+                    if (recent_orders.Where(p => p.side == "Buy" && p.text == "End" && p.price == price - _margin).Count() == 0)
+                    {
+                        if (bitemex_position.currentQty >= 0 || price < bitemex_position.marginCallPrice)
+                        {
+                            _bitmex_order = new bitmex_order();
+                            _bitmex_order.symbol = "XBTUSD";
+                            _bitmex_order.side = "Sell";
+                            _bitmex_order.orderQty = step_Qty;
+                            _bitmex_order.price = price;
+                            _bitmex_order.ordType = "Limit";
+                            _bitmex_order.text = "Trad";
+                            list_bitmex_order.Add(_bitmex_order);
+                        }
+                    }
+                }
+
+            }
+
+
+            #region 청산 - 기능없앰.
+            //[4] 청산
+            //if (pre_recent_orders != null && pre_recent_orders.Count() > 0)
+            //{
+            //    foreach (var item in pre_recent_orders.Where(p => p.text == "Trad"))
+            //    {
+            //        if (recent_orders.Where(p => p.orderID == item.orderID).Count() == 0)
+            //        {
+            //            _bitmex_order = new bitmex_order();
+            //            _bitmex_order.symbol = "XBTUSD";
+            //            _bitmex_order.side = item.side == "Buy" ? "Sell" : "Buy";
+            //            //_bitmex_order.clOrdID = item.text == "Buy" ? "Buy_" + no.ToString() : "Sell_" + no.ToString();
+            //            _bitmex_order.orderQty = step_Qty -1;
+            //            _bitmex_order.price = item.side == "Buy" ? item.price + _margin : item.price - _margin;
+            //            _bitmex_order.ordType = "Limit";
+            //            _bitmex_order.text = "End";
+            //            list_bitmex_order.Add(_bitmex_order);
+            //        }
+            //    }
+            //    int int_Count_Buy = Convert.ToInt32(txt_Count_Buy.Text);
+            //    int int_Count_Sell = Convert.ToInt32(txt_Count_Sell.Text);
+            //    int int_Count_SellEnd = Convert.ToInt32(txt_Count_BuyEnd.Text);
+            //    int int_Count_BuyEnd = Convert.ToInt32(txt_Count_SellEnd.Text);
+            //    foreach (var item in pre_recent_orders)
+            //    {
+            //        if (recent_orders.Where(p => p.orderID == item.orderID).Count() == 0)
+            //        {
+            //            if (item.side == "Buy" && item.text == "Trad")
+            //            {
+            //                int_Count_Buy++;
+
+            //            }
+            //            else if(item.side == "Sell" && item.text == "Trad")
+            //            {
+            //                int_Count_Sell++;
+            //            }
+            //            else if (item.side == "Buy" && item.text == "End")
+            //            {
+            //                int_Count_SellEnd++;
+            //            }
+            //            else if (item.side == "Sell" && item.text == "End")
+            //            {
+            //                int_Count_BuyEnd++;
+            //            }
+            //        }
+            //    }
+            //    txt_Count_Buy.Text = int_Count_Buy.ToString();
+            //    txt_Count_Sell.Text = int_Count_Sell.ToString();
+            //    txt_Count_BuyEnd.Text = int_Count_SellEnd.ToString();
+            //    txt_Count_SellEnd.Text = int_Count_SellEnd.ToString();
+            //} 
+            #endregion
+
+            #region 안쓰는기능
+            //int _BuyCount = recent_orders.Where(p => p.side == "Buy" && p.text == "Buy").Count();
+            //int _SellCount = recent_orders.Where(p => p.side == "Sell" && p.text == "Sell").Count();
+
+            //if (bitemex_position.currentQty == 0)
+            //{
+            //    bitemex.DeleteAllOrders();
+
+            //    for (int i = 0; i < 2; i++)
+            //    {
+            //        _bitmex_order = new bitmex_order();
+            //        _bitmex_order.symbol = "XBTUSD";
+            //        _bitmex_order.side = "Buy";
+            //        _bitmex_order.clOrdID = "Buy_" + no.ToString();
+            //        _bitmex_order.orderQty = step_Qty;
+            //        _bitmex_order.price = now_close - step_spring * (i + 1);
+            //        _bitmex_order.ordType = "Limit";
+            //        _bitmex_order.text = "Buy";
+            //        list_bitmex_order.Add(_bitmex_order);
+            //    }
+            //    for (int i = 0; i < 2; i++)
+            //    {
+            //        _bitmex_order = new bitmex_order();
+            //        _bitmex_order.symbol = "XBTUSD";
+            //        _bitmex_order.side = "Sell";
+            //        _bitmex_order.clOrdID = "Sell_" + no.ToString();
+            //        _bitmex_order.orderQty = step_Qty;
+            //        _bitmex_order.price = now_close + step_spring * (i + 1);
+            //        _bitmex_order.ordType = "Limit";
+            //        _bitmex_order.text = "Sell";
+            //        list_bitmex_order.Add(_bitmex_order);
+            //    }
+            //}
+            //else
+            //{
+            //    double sell_low_price = 0;
+            //    double sell_high_price = 0;
+            //    double buy_high_price = 0;
+            //    double buy_low_price = 0;
+            //    if (pre_recent_orders != null && pre_recent_orders.Count() > 0)
+            //    {
+            //        //청산하기
+            //        foreach (var item in pre_recent_orders.Where(p => p.text != "end"))
+            //        {
+
+            //            if (recent_orders.Where(p => p.orderID == item.orderID).Count() == 0)
+            //            {
+
+            //                if (item.text == "Buy")
+            //                {
+            //                    _bitmex_order = new bitmex_order();
+            //                    _bitmex_order.symbol = "XBTUSD";
+            //                    _bitmex_order.side = "Sell";
+            //                    _bitmex_order.clOrdID = "Sell_" + no.ToString();
+            //                    _bitmex_order.orderQty = step_Qty;
+            //                    _bitmex_order.price = item.price + (_margin * 1);
+            //                    _bitmex_order.ordType = "Limit";
+            //                    _bitmex_order.text = "end";
+            //                    list_bitmex_order.Add(_bitmex_order);
+            //                }
+            //                else if (item.text == "Sell")
+            //                {
+            //                    _bitmex_order = new bitmex_order();
+            //                    _bitmex_order.symbol = "XBTUSD";
+            //                    _bitmex_order.side = "Buy";
+            //                    _bitmex_order.clOrdID = "Buy_" + no.ToString();
+            //                    _bitmex_order.orderQty = step_Qty;
+            //                    _bitmex_order.price = item.price - (_margin * 1);
+            //                    _bitmex_order.ordType = "Limit";
+            //                    _bitmex_order.text = "end";
+            //                    list_bitmex_order.Add(_bitmex_order);
+            //                }
+            //            }
+
+            //        }
+            //        //청산하기 성공시 재주문.
+            //        foreach (var item in pre_recent_orders.Where(p => p.text == "end"))
+            //        {
+            //            if (recent_orders.Where(p => p.orderID == item.orderID).Count() == 0)
+            //            {
+
+            //                if (item.text == "Buy")
+            //                {
+            //                    _bitmex_order = new bitmex_order();
+            //                    _bitmex_order.symbol = "XBTUSD";
+            //                    _bitmex_order.side = "Sell";
+            //                    _bitmex_order.clOrdID = "Sell_" + no.ToString();
+            //                    _bitmex_order.orderQty = step_Qty;
+            //                    _bitmex_order.price = item.price + (_margin * 1);
+            //                    _bitmex_order.ordType = "Limit";
+            //                    _bitmex_order.text = "Sell";
+            //                    list_bitmex_order.Add(_bitmex_order);
+            //                    buy_high_price = buy_high_price > _bitmex_order.price ? buy_high_price : _bitmex_order.price;
+            //                    buy_low_price = buy_low_price < _bitmex_order.price ? buy_low_price : _bitmex_order.price;
+            //                    _BuyCount++;
+            //                }
+            //                else if (item.text == "Sell")
+            //                {
+            //                    _bitmex_order = new bitmex_order();
+            //                    _bitmex_order.symbol = "XBTUSD";
+            //                    _bitmex_order.side = "Buy";
+            //                    _bitmex_order.clOrdID = "Buy_" + no.ToString();
+            //                    _bitmex_order.orderQty = step_Qty;
+            //                    _bitmex_order.price = item.price - (_margin * 1);
+            //                    _bitmex_order.ordType = "Limit";
+            //                    _bitmex_order.text = "Buy";
+            //                    list_bitmex_order.Add(_bitmex_order);
+            //                    sell_high_price = sell_high_price > _bitmex_order.price ? sell_high_price : _bitmex_order.price;
+            //                    sell_low_price = sell_low_price < _bitmex_order.price ? sell_low_price : _bitmex_order.price;
+            //                    _SellCount++;
+            //                }
+            //            }
+            //        }
+            //    }
+
+
+            //    if (recent_orders.Where(p => p.side == "Sell").Count() > 0)
+            //    {
+            //        double __sell_low_price = recent_orders.Where(p => p.side == "Sell").OrderBy(p => p.price).FirstOrDefault().price;
+            //        sell_low_price = sell_low_price != 0 && sell_low_price < __sell_low_price ? sell_low_price : __sell_low_price;
+            //        double __sell_high_price = recent_orders.Where(p => p.side == "Sell").OrderByDescending(p => p.price).FirstOrDefault().price;
+            //        sell_high_price = sell_high_price > __sell_high_price ? sell_high_price : __sell_high_price;
+            //    }
+            //    else
+            //    {
+            //        sell_low_price = now_close;
+            //        sell_high_price = now_close;
+            //    }
+
+            //    if (recent_orders.Where(p => p.side == "Buy").Count() > 0)
+            //    {
+            //        double __buy_high_price = recent_orders.Where(p => p.side == "Buy").OrderByDescending(p => p.price).FirstOrDefault().price;
+            //        buy_high_price = buy_high_price > __buy_high_price ? buy_high_price : __buy_high_price;
+            //        double __buy_low_price = recent_orders.Where(p => p.side == "Buy").OrderBy(p => p.price).FirstOrDefault().price;
+            //        buy_low_price = __buy_low_price != 0 && buy_low_price < __buy_low_price ? buy_low_price : __buy_low_price;
+            //    }
+            //    else
+            //    {
+            //        buy_high_price = now_close;
+            //        buy_low_price = now_close;
+            //    }
+
+
+            //    if (_BuyCount < 7)
+            //    {
+            //        for (int i = _BuyCount; i < 7; i++)
+            //        {
+            //            _bitmex_order = new bitmex_order();
+            //            _bitmex_order.symbol = "XBTUSD";
+            //            _bitmex_order.side = "Buy";
+            //            _bitmex_order.clOrdID = "Buy_" + no.ToString();
+            //            _bitmex_order.orderQty = step_Qty;
+            //            _bitmex_order.price = buy_low_price - step_spring * (i + 1);
+            //            _bitmex_order.ordType = "Limit";
+            //            _bitmex_order.text = "Buy";
+            //            list_bitmex_order.Add(_bitmex_order);
+            //        }
+            //    }
+            //    else if (_BuyCount == 7)
+            //    {
+
+            //    }
+            //    else
+            //    {
+            //        for (int i = 7; i < _BuyCount; i++)
+            //        {
+            //            string _id = recent_orders.Where(p => p.side == "Buy").OrderBy(p => p.price).Skip(i).FirstOrDefault().orderID;
+            //            bitemex.DeleteOrders_ByID(_id, "cancel order by ID");
+            //        }
+            //    }
+
+            //    if (_SellCount < 7)
+            //    {
+            //        for (int i = _SellCount; i < 7; i++)
+            //        {
+            //            _bitmex_order = new bitmex_order();
+            //            _bitmex_order.symbol = "XBTUSD";
+            //            _bitmex_order.side = "Sell";
+            //            _bitmex_order.clOrdID = "Sell_" + no.ToString();
+            //            _bitmex_order.orderQty = step_Qty;
+            //            _bitmex_order.price = sell_high_price + step_spring * (i + 1);
+            //            _bitmex_order.ordType = "Limit";
+            //            _bitmex_order.text = "Sell";
+            //            list_bitmex_order.Add(_bitmex_order);
+            //        }
+            //    }
+            //    else if (_SellCount == 7)
+            //    {
+
+            //    }
+            //    else
+            //    {
+            //        for (int i = 7; i < _SellCount; i++)
+            //        {
+            //            string _id = recent_orders.Where(p => p.side == "Sell").OrderByDescending(p => p.price).Skip(i).FirstOrDefault().orderID;
+            //            bitemex.DeleteOrders_ByID(_id, "cancel order by ID");
+            //        }
+            //    }
+
+
+
+
+
+            //} 
+            #endregion
+
+            pre_recent_orders = new List<bitmex_order>();
+            pre_recent_orders = recent_orders;
+
+            if (list_bitmex_order.Count() > 0)
+            {
+                string _result = bitemex.PostOrders_bulk(list_bitmex_order);
+                List<bitmex_order>  add_orders = JsonConvert.DeserializeObject<List<bitmex_order>>(_result);
+                foreach (var item in add_orders)
+                {
+                    bitmex_order add_bitmex_order = new bitmex_order();
+                    add_bitmex_order.orderID = item.orderID;
+                    add_bitmex_order.price = item.price;
+                    add_bitmex_order.side = item.side;
+                    add_bitmex_order.orderQty = item.orderQty;
+                    add_bitmex_order.text = item.text;
+                    pre_recent_orders.Add(add_bitmex_order);
+                }
+            }
+
+            if (pre_recent_orders.Where(p => p.side == "Buy").Count() > 4)
+            {
+                for (int i = 20; i < pre_recent_orders.Where(p => p.side == "Buy").Count(); i++)
+                {
+                    string deleteid = pre_recent_orders.Where(p => p.side == "Buy").OrderByDescending(p => p.price).Skip(i).FirstOrDefault().orderID;
+                    bitemex.DeleteOrders_ByID(deleteid, "over trad");
+                }
+                
+            }
+            if (pre_recent_orders.Where(p => p.side == "Sell").Count() > 4)
+            {
+                for (int i = 20; i < pre_recent_orders.Where(p => p.side == "Sell").Count(); i++)
+                {
+                    string deleteid = pre_recent_orders.Where(p => p.side == "Sell").OrderBy(p => p.price).Skip(i).FirstOrDefault().orderID;
+                    bitemex.DeleteOrders_ByID(deleteid, "over trad");
+                }
+            }
+
+
+
+
+            //no++;
         }
 
 

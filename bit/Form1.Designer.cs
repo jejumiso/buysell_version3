@@ -32,6 +32,10 @@
             this.btn_Start = new System.Windows.Forms.Button();
             this.txt_position = new System.Windows.Forms.TextBox();
             this.btn_balance = new System.Windows.Forms.Button();
+            this.txt_Count_Buy = new System.Windows.Forms.Label();
+            this.txt_Count_BuyEnd = new System.Windows.Forms.Label();
+            this.txt_Count_Sell = new System.Windows.Forms.Label();
+            this.txt_Count_SellEnd = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // btn_Stop
@@ -73,11 +77,51 @@
             this.btn_balance.UseVisualStyleBackColor = true;
             this.btn_balance.Click += new System.EventHandler(this.btn_balance_Click);
             // 
+            // txt_Count_Buy
+            // 
+            this.txt_Count_Buy.AutoSize = true;
+            this.txt_Count_Buy.Location = new System.Drawing.Point(45, 233);
+            this.txt_Count_Buy.Name = "txt_Count_Buy";
+            this.txt_Count_Buy.Size = new System.Drawing.Size(11, 12);
+            this.txt_Count_Buy.TabIndex = 23;
+            this.txt_Count_Buy.Text = "0";
+            // 
+            // txt_Count_BuyEnd
+            // 
+            this.txt_Count_BuyEnd.AutoSize = true;
+            this.txt_Count_BuyEnd.Location = new System.Drawing.Point(173, 233);
+            this.txt_Count_BuyEnd.Name = "txt_Count_BuyEnd";
+            this.txt_Count_BuyEnd.Size = new System.Drawing.Size(11, 12);
+            this.txt_Count_BuyEnd.TabIndex = 24;
+            this.txt_Count_BuyEnd.Text = "0";
+            // 
+            // txt_Count_Sell
+            // 
+            this.txt_Count_Sell.AutoSize = true;
+            this.txt_Count_Sell.Location = new System.Drawing.Point(45, 260);
+            this.txt_Count_Sell.Name = "txt_Count_Sell";
+            this.txt_Count_Sell.Size = new System.Drawing.Size(11, 12);
+            this.txt_Count_Sell.TabIndex = 25;
+            this.txt_Count_Sell.Text = "0";
+            // 
+            // txt_Count_SellEnd
+            // 
+            this.txt_Count_SellEnd.AutoSize = true;
+            this.txt_Count_SellEnd.Location = new System.Drawing.Point(173, 260);
+            this.txt_Count_SellEnd.Name = "txt_Count_SellEnd";
+            this.txt_Count_SellEnd.Size = new System.Drawing.Size(11, 12);
+            this.txt_Count_SellEnd.TabIndex = 26;
+            this.txt_Count_SellEnd.Text = "0";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(457, 211);
+            this.ClientSize = new System.Drawing.Size(473, 299);
+            this.Controls.Add(this.txt_Count_SellEnd);
+            this.Controls.Add(this.txt_Count_Sell);
+            this.Controls.Add(this.txt_Count_BuyEnd);
+            this.Controls.Add(this.txt_Count_Buy);
             this.Controls.Add(this.btn_balance);
             this.Controls.Add(this.txt_position);
             this.Controls.Add(this.btn_Start);
@@ -95,6 +139,10 @@
         private System.Windows.Forms.Button btn_Start;
         private System.Windows.Forms.TextBox txt_position;
         private System.Windows.Forms.Button btn_balance;
+        private System.Windows.Forms.Label txt_Count_Buy;
+        private System.Windows.Forms.Label txt_Count_BuyEnd;
+        private System.Windows.Forms.Label txt_Count_Sell;
+        private System.Windows.Forms.Label txt_Count_SellEnd;
     }
 }
 
