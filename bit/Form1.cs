@@ -19,9 +19,9 @@ namespace bit
     public partial class Form1 : Form
     {
 
-        // hyunju3414764
-        private static string bitmexKey = "vdWSmeX7xugJPc6B5mq9O2aZ";
-        private static string bitmexSecret = "gePBeNVzkb2V7e2hxCjB-K5zBYduwPpKoP8tfQThNLlE89Bq";
+        // jejuairfarm
+        private static string bitmexKey = "JWLE9oPI2Tkd8rDVBHTrQq-6";
+        private static string bitmexSecret = "YJbAWZqlhqtgY7FWLaCYgJntqRIrQBMvDmKjZmzrcKRawlUq";
 
         // [2]
         BitMEXApi bitemex = new BitMEXApi(bitmexKey, bitmexSecret);
@@ -48,7 +48,7 @@ namespace bit
             Auto_Trad_Play();
         }
 
-        int timeloop = 5;  //고정값
+        int timeloop = 3;  //고정값
         int pre_currentQty = -1;
         double pre_avgCostPrice = -1;
         private void Auto_Trad_Play()
@@ -65,21 +65,19 @@ namespace bit
                     if (bitmex_Get_bucketed_2() && bitmex_Get_recent_orders())
                     {
                         double close = btmex_Bucketeds[0].close;
-                        if (Math.Abs(bitemex_position.currentQty) > 1500)
-                        //if (Math.Abs(bitemex_position.currentQty) > 10000)
+                        if (Math.Abs(bitemex_position.currentQty) > 11000)
                         {
                             if (bitemex_position.currentQty > 0)
                             {
-                                bitemex.PostOrders("XBTUSD", "Sell", 1000, close - 50, "Limit", "overtradEnd");
-                                //bitemex.PostOrders("XBTUSD", "Sell", 5000, close - 50, "Limit", "overtradEnd");
+                                bitemex.PostOrders("XBTUSD", "Sell", 2500, close - 50, "Limit", "overtradEnd");
                             }
                             else
                             {
-                                bitemex.PostOrders("XBTUSD", "Buy", 1000, close + 50, "Limit", "overtradEnd");
-                                //bitemex.PostOrders("XBTUSD", "Buy", 5000, close + 50, "Limit", "overtradEnd");
+                                bitemex.PostOrders("XBTUSD", "Buy", 2500, close + 50, "Limit", "overtradEnd");
                             }
                         }
                         order_System2(close);
+                        
                     }
                 }
                 else
@@ -110,8 +108,7 @@ namespace bit
         double iniinitial_value = 1000;
         public void order_System2(double now_close)
         {
-            pre_currentQty = bitemex_position.currentQty;
-            pre_avgCostPrice = (double)bitemex_position.avgCostPrice;
+            
 
             if (pre_recent_orders == null && recent_orders.Count() > 0)
             {
@@ -124,7 +121,7 @@ namespace bit
             int step_Qty; double step_spring; 
             //step_Qty = 60; step_spring = 5.0; 
             //step_Qty = 300; step_spring = 5.0;
-            step_Qty = 500; step_spring = 5.0;
+            step_Qty = 300; step_spring = 15.0;
             //[2-2] setting2
             iniinitial_value = 1000;
             int step_skip = Math.Abs(Convert.ToInt32(Math.Truncate((now_close - iniinitial_value) / step_spring))); // 7010 - 7000 = 10  => skip:2
@@ -207,6 +204,9 @@ namespace bit
 
             if (__result)
             {
+                pre_currentQty = bitemex_position.currentQty;
+                pre_avgCostPrice = (double)bitemex_position.avgCostPrice;
+
                 if (pre_recent_orders.Where(p => p.side == "Buy").Count() > 4)
                 {
                     for (int i = 20; i < pre_recent_orders.Where(p => p.side == "Buy").Count(); i++)
@@ -214,7 +214,6 @@ namespace bit
                         string deleteid = pre_recent_orders.Where(p => p.side == "Buy").OrderByDescending(p => p.price).Skip(i).FirstOrDefault().orderID;
                         bitemex.DeleteOrders_ByID(deleteid, "over trad");
                     }
-
                 }
                 if (pre_recent_orders.Where(p => p.side == "Sell").Count() > 4)
                 {
@@ -314,11 +313,19 @@ namespace bit
         }
         private void btn_balance_Click(object sender, EventArgs e)
         {
-            user_margin _user_margin = new user_margin();
-            _user_margin = JsonConvert.DeserializeObject<user_margin>(bitemex.GetUserMargin());
-            txt_position.AppendText("○ " + DateTime.Now.ToString("MM월dd일 HH시mm분") +
-                 "         " + string.Format("{0:#,###}", _user_margin.walletBalance * 0.1) +
-                 "         " + string.Format("{0:#,###}", _user_margin.marginBalance * 0.1) + "\r\n");
+            try
+            {
+                user_margin _user_margin = new user_margin();
+                _user_margin = JsonConvert.DeserializeObject<user_margin>(bitemex.GetUserMargin());
+                txt_position.AppendText("○ " + DateTime.Now.ToString("MM월dd일 HH시mm분") +
+                     "         " + string.Format("{0:#,###}", _user_margin.walletBalance * 0.1) +
+                     "         " + string.Format("{0:#,###}", _user_margin.marginBalance * 0.1) + "\r\n");
+            }
+            catch (Exception)
+            {
+                //
+            }
+            
         }
         private void Form1_Load(object sender, EventArgs e)
         {

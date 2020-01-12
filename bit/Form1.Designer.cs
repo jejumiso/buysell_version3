@@ -127,7 +127,7 @@
             this.Controls.Add(this.btn_Start);
             this.Controls.Add(this.btn_Stop);
             this.Name = "Form1";
-            this.Text = "hyunju3414764";
+            this.Text = "jejuairfarm";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
