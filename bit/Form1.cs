@@ -137,17 +137,24 @@ namespace bit
                     var _item_ = recent_orders.Where(p => p.orderID == item.orderID).FirstOrDefault();
                     if (_item_ == null)
                     {
-                        double dd_price = item.side == "Buy" ? item.price + _margin : item.price - _margin;
-                        dd_price = item.side == "Buy" && dd_price > now_close + _margin ? dd_price : now_close + _margin;
-                        dd_price = item.side == "Sell" && dd_price < now_close - _margin ? dd_price : now_close - _margin;
+                        string _side = item.side == "Buy" ? "Sell" : "Buy";
+                        double dd_price = _side == "Buy" ? item.price - _margin : item.price + _margin;
+                        if (_side == "Buy")
+                        {
+                            dd_price = dd_price < now_close - _margin ? dd_price : now_close - _margin;
+                        }
+                        if (_side == "Sell")
+                        {
+                            dd_price = dd_price > now_close + _margin ? dd_price : now_close + _margin;
+                        }
 
                         _bitmex_order = new bitmex_order();
                         _bitmex_order.symbol = "XBTUSD";
-                        _bitmex_order.side = item.side == "Buy" ? "Sell" : "Buy";
+                        _bitmex_order.side = _side;
                         _bitmex_order.orderQty = step_Qty;
                         _bitmex_order.price = dd_price;
                         _bitmex_order.ordType = "Limit";
-                        _bitmex_order.text = "Trad_End";
+                        _bitmex_order.text = "Trad_End" + item.price + item.side;
                         list_bitmex_order.Add(_bitmex_order);
                     }
                 }
