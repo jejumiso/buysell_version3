@@ -117,10 +117,10 @@ namespace bit
 
 
             //[2-1] setting
-            int step_Qty; double step_spring; 
+            int step_Qty; double step_spring; double _margin;
             //step_Qty = 60; step_spring = 5.0; 
             //step_Qty = 300; step_spring = 5.0;
-            step_Qty = 750; step_spring =10.0;
+            step_Qty = 50; step_spring =5.0; _margin = 20.0;
             //[2-2] setting2
             iniinitial_value = 1000;
             int step_skip = Math.Abs(Convert.ToInt32(Math.Truncate((now_close - iniinitial_value) / step_spring))); // 7010 - 7000 = 10  => skip:2
@@ -137,9 +137,9 @@ namespace bit
                     var _item_ = recent_orders.Where(p => p.orderID == item.orderID).FirstOrDefault();
                     if (_item_ == null)
                     {
-                        double dd_price = item.side == "Buy" ? item.price + step_spring : item.price - step_spring;
-                        dd_price = item.side == "Buy" && dd_price > now_close + 3 ? dd_price : now_close + 5;
-                        dd_price = item.side == "Sell" && dd_price < now_close - 3 ? dd_price : now_close - 5;
+                        double dd_price = item.side == "Buy" ? item.price + _margin : item.price - _margin;
+                        dd_price = item.side == "Buy" && dd_price > now_close + _margin ? dd_price : now_close + _margin;
+                        dd_price = item.side == "Sell" && dd_price < now_close - _margin ? dd_price : now_close - _margin;
 
                         _bitmex_order = new bitmex_order();
                         _bitmex_order.symbol = "XBTUSD";
