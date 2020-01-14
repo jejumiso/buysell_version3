@@ -120,7 +120,7 @@ namespace bit
             int step_Qty; double step_spring; double _margin;
             //step_Qty = 60; step_spring = 5.0; 
             //step_Qty = 300; step_spring = 5.0;
-            step_Qty = 50; step_spring =5.0; _margin = 20.0;
+            step_Qty = 22; step_spring = 3.0; _margin = 9.0;
             //[2-2] setting2
             iniinitial_value = 1000;
             int step_skip = Math.Abs(Convert.ToInt32(Math.Truncate((now_close - iniinitial_value) / step_spring))); // 7010 - 7000 = 10  => skip:2
@@ -160,7 +160,6 @@ namespace bit
                 }
             }
             
-
 
             //[3-2] 새로운 주문 넣기.
 
