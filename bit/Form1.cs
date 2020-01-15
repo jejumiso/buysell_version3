@@ -106,7 +106,7 @@ namespace bit
         double iniinitial_value = 1000;
         public void order_System2(double now_close)
         {
-            
+
 
             // 이걸 왜 했을까??.....
             //if (pre_recent_orders == null && recent_orders.Count() > 0)
@@ -120,7 +120,7 @@ namespace bit
             int step_Qty; double step_spring; double _margin;
             //step_Qty = 60; step_spring = 5.0; 
             //step_Qty = 300; step_spring = 5.0;
-            step_Qty = 22; step_spring = 3.0; _margin = 9.0;
+            step_Qty = 25; step_spring = 5.0; _margin = 13.0;
             //[2-2] setting2
             iniinitial_value = 1000;
             int step_skip = Math.Abs(Convert.ToInt32(Math.Truncate((now_close - iniinitial_value) / step_spring))); // 7010 - 7000 = 10  => skip:2
@@ -159,7 +159,8 @@ namespace bit
                     }
                 }
             }
-            
+
+
 
             //[3-2] 새로운 주문 넣기.
 
@@ -167,20 +168,27 @@ namespace bit
             {
                 double price = 0;
                 //[4-1] Buy    
-                price = iniinitial_value -  (i + 1) * step_spring;
-                // 조건 :  주문 넣은게 없고 / 청산조건에 걸리지 않아야함.
+                price = iniinitial_value - (i + 1) * step_spring;
+                // 조건 :  주문 넣은게 없고 / 청산조건에 걸리지 않아야함.  / Trad_End 주문이 없어야함.
                 if (recent_orders.Where(p => p.side == "Buy" && p.text == "Trad" && p.price == price).Count() == 0)
                 {
                     if (bitemex_position.currentQty <= 0 || price > bitemex_position.marginCallPrice)
                     {
-                        _bitmex_order = new bitmex_order();
-                        _bitmex_order.symbol = "XBTUSD";
-                        _bitmex_order.side = "Buy";
-                        _bitmex_order.orderQty = step_Qty;
-                        _bitmex_order.price = price;
-                        _bitmex_order.ordType = "Limit";
-                        _bitmex_order.text = "Trad";
-                        list_bitmex_order.Add(_bitmex_order);
+                        if (list_bitmex_order.Where(p => p.text == "Trad_End" + price + "Buy").Count() == 0)
+                        {
+                            if (recent_orders.Where(p => p.text == "Trad_End" + price + "Buy").Count() == 0)
+                            {
+                                _bitmex_order = new bitmex_order();
+                                _bitmex_order.symbol = "XBTUSD";
+                                _bitmex_order.side = "Buy";
+                                _bitmex_order.orderQty = step_Qty;
+                                _bitmex_order.price = price;
+                                _bitmex_order.ordType = "Limit";
+                                _bitmex_order.text = "Trad";
+                                list_bitmex_order.Add(_bitmex_order);
+                            }
+                        }
+
                     }
                 }
                 //[4-2] Sell 
@@ -190,14 +198,20 @@ namespace bit
                 {
                     if (bitemex_position.currentQty >= 0 || price < bitemex_position.marginCallPrice)
                     {
-                        _bitmex_order = new bitmex_order();
-                        _bitmex_order.symbol = "XBTUSD";
-                        _bitmex_order.side = "Sell";
-                        _bitmex_order.orderQty = step_Qty;
-                        _bitmex_order.price = price;
-                        _bitmex_order.ordType = "Limit";
-                        _bitmex_order.text = "Trad";
-                        list_bitmex_order.Add(_bitmex_order);
+                        if (list_bitmex_order.Where(p => p.text == "Trad_End" + price + "Sell").Count() == 0)
+                        {
+                            if (recent_orders.Where(p => p.text == "Trad_End" + price + "Sell").Count() == 0)
+                            {
+                                _bitmex_order = new bitmex_order();
+                                _bitmex_order.symbol = "XBTUSD";
+                                _bitmex_order.side = "Sell";
+                                _bitmex_order.orderQty = step_Qty;
+                                _bitmex_order.price = price;
+                                _bitmex_order.ordType = "Limit";
+                                _bitmex_order.text = "Trad";
+                                list_bitmex_order.Add(_bitmex_order);
+                            }
+                        }
                     }
                 }
             }
@@ -251,7 +265,7 @@ namespace bit
                         {
                             pre_recent_orders.Remove(pre_recent_orders.FirstOrDefault(p => p.orderID == deleteid));
                         }
-                        
+
                     }
                 }
             }
@@ -259,7 +273,7 @@ namespace bit
             {
 
             }
-            
+
         }
 
         private void btn_Start_Click_1(object sender, EventArgs e)
@@ -357,7 +371,7 @@ namespace bit
                      "         " + string.Format("{0:#,###}", _user_margin.marginBalance * 0.1) +
                      "         " + string.Format("{0:#,###}", btmex_Bucketeds[0].close) +
                      "         " + string.Format("{0:#,###}", bitemex_position.avgCostPrice) + " * " +
-                                   string.Format("{0:#,###}", bitemex_position.avgCostPrice) + "\r\n");
+                                   string.Format("{0:#,###}", bitemex_position.currentQty) + "\r\n");
             }
             catch (Exception)
             {
