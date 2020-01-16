@@ -22,7 +22,7 @@ namespace bit.Model
         public string homeNotional { get; set; }
         public string foreignNotional { get; set; }
     }
-    public class bitemex_position
+    public class bitmex_position
     {
         public int account { get; set; }
         public string symbol { get; set; }

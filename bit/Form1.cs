@@ -24,8 +24,8 @@ namespace bit
         private static string bitmexSecret = "YJbAWZqlhqtgY7FWLaCYgJntqRIrQBMvDmKjZmzrcKRawlUq";
 
         // [2]
-        BitMEXApi bitemex = new BitMEXApi(bitmexKey, bitmexSecret);
-        bitemex_position bitemex_position = new bitemex_position();
+        BitMEXApi bitmex = new BitMEXApi(bitmexKey, bitmexSecret);
+        bitmex_position bitmex_position = new bitmex_position();
         List<bitmex_order> bitmex_orders = new List<bitmex_order>();
         List<bitmex_bucketed> btmex_Bucketeds = new List<bitmex_bucketed>();
         // [2-1] 
@@ -50,7 +50,7 @@ namespace bit
             timer1.Start();
         }
 
-        int timeloop = 3;  //고정값
+        int timeloop = 4;  //고정값
         int pre_currentQty = -1;
         double pre_avgCostPrice = -1;
         private void Auto_Trad_Play()
@@ -62,24 +62,23 @@ namespace bit
             //[2]
             if (GetPositions())   //postion불러오기를 성공 할시...
             {
-                if (pre_currentQty != bitemex_position.currentQty || pre_avgCostPrice != bitemex_position.avgCostPrice)
+                if (pre_currentQty != bitmex_position.currentQty || pre_avgCostPrice != bitmex_position.avgCostPrice)
                 {
                     if (bitmex_Get_bucketed_2() && bitmex_Get_recent_orders())
                     {
                         double close = btmex_Bucketeds[0].close;
-                        if (Math.Abs(bitemex_position.currentQty) > 13000)
+                        if (Math.Abs(bitmex_position.currentQty) > 17000)
                         {
-                            if (bitemex_position.currentQty > 0)
+                            if (bitmex_position.currentQty > 0)
                             {
-                                bitemex.PostOrders("XBTUSD", "Sell", 2500, close - 50, "Limit", "overtradEnd");
+                                bitmex.PostOrders("XBTUSD", "Sell", 2500, close - 50, "Limit", "overtradEnd");
                             }
                             else
                             {
-                                bitemex.PostOrders("XBTUSD", "Buy", 2500, close + 50, "Limit", "overtradEnd");
+                                bitmex.PostOrders("XBTUSD", "Buy", 2500, close + 50, "Limit", "overtradEnd");
                             }
                         }
                         order_System2(close);
-                        
                     }
                 }
             }
@@ -90,7 +89,7 @@ namespace bit
             try
             {
                 //[1] 주문 내역 불러오기
-                var json_result = bitemex.GetOrders("XBTUSD", "{\"ordStatus\":\"New\"}", 200, true, "");
+                var json_result = bitmex.GetOrders("XBTUSD", "{\"ordStatus\":\"New\"}", 200, true, "");
                 recent_orders = JsonConvert.DeserializeObject<List<bitmex_order>>(json_result);
                 
                 return true;
@@ -120,7 +119,8 @@ namespace bit
             int step_Qty; double step_spring; double _margin;
             //step_Qty = 60; step_spring = 5.0; 
             //step_Qty = 300; step_spring = 5.0;
-            step_Qty = 25; step_spring = 5.0; _margin = 13.0;
+            //step_Qty = 25; step_spring = 5.0; _margin = 13.0;
+            step_Qty = 250; step_spring = 5.0; _margin = 36.0;
             //[2-2] setting2
             iniinitial_value = 1000;
             int step_skip = Math.Abs(Convert.ToInt32(Math.Truncate((now_close - iniinitial_value) / step_spring))); // 7010 - 7000 = 10  => skip:2
@@ -172,7 +172,7 @@ namespace bit
                 // 조건 :  주문 넣은게 없고 / 청산조건에 걸리지 않아야함.  / Trad_End 주문이 없어야함.
                 if (recent_orders.Where(p => p.side == "Buy" && p.text == "Trad" && p.price == price).Count() == 0)
                 {
-                    if (bitemex_position.currentQty <= 0 || price > bitemex_position.marginCallPrice)
+                    if (bitmex_position.currentQty <= 0 || price > bitmex_position.marginCallPrice)
                     {
                         if (list_bitmex_order.Where(p => p.text == "Trad_End" + price + "Buy").Count() == 0)
                         {
@@ -196,7 +196,7 @@ namespace bit
                 // 조건 :  주문 넣은게 없고 /  청산조건에 걸리지 않아야함.
                 if (recent_orders.Where(p => p.side == "Sell" && p.text == "Trad" && p.price == price).Count() == 0)
                 {
-                    if (bitemex_position.currentQty >= 0 || price < bitemex_position.marginCallPrice)
+                    if (bitmex_position.currentQty >= 0 || price < bitmex_position.marginCallPrice)
                     {
                         if (list_bitmex_order.Where(p => p.text == "Trad_End" + price + "Sell").Count() == 0)
                         {
@@ -222,7 +222,7 @@ namespace bit
             {
                 try
                 {
-                    string _result = bitemex.PostOrders_bulk(list_bitmex_order);
+                    string _result = bitmex.PostOrders_bulk(list_bitmex_order);
                     List<bitmex_order> add_orders = JsonConvert.DeserializeObject<List<bitmex_order>>(_result);
                     foreach (var item in add_orders)
                     {
@@ -245,13 +245,13 @@ namespace bit
             {
                 if (__result)
                 {
-                    pre_currentQty = bitemex_position.currentQty;
-                    pre_avgCostPrice = (double)bitemex_position.avgCostPrice;
+                    pre_currentQty = bitmex_position.currentQty;
+                    pre_avgCostPrice = (double)bitmex_position.avgCostPrice;
 
                     for (int i = 20; i < pre_recent_orders.Where(p => p.side == "Buy" && p.text == "Trad").Count(); i++)
                     {
                         string deleteid = pre_recent_orders.Where(p => p.side == "Buy" && p.text == "Trad").OrderByDescending(p => p.price).Skip(i).FirstOrDefault().orderID;
-                        bitemex.DeleteOrders_ByID(deleteid, "over trad");
+                        bitmex.DeleteOrders_ByID(deleteid, "over trad");
                         if (pre_recent_orders.FirstOrDefault(p => p.orderID == deleteid) != null)
                         {
                             pre_recent_orders.Remove(pre_recent_orders.FirstOrDefault(p => p.orderID == deleteid));
@@ -260,7 +260,7 @@ namespace bit
                     for (int i = 20; i < pre_recent_orders.Where(p => p.side == "Sell" && p.text == "Trad").Count(); i++)
                     {
                         string deleteid = pre_recent_orders.Where(p => p.side == "Sell" && p.text == "Trad").OrderBy(p => p.price).Skip(i).FirstOrDefault().orderID;
-                        bitemex.DeleteOrders_ByID(deleteid, "over trad");
+                        bitmex.DeleteOrders_ByID(deleteid, "over trad");
                         if (pre_recent_orders.FirstOrDefault(p => p.orderID == deleteid) != null)
                         {
                             pre_recent_orders.Remove(pre_recent_orders.FirstOrDefault(p => p.orderID == deleteid));
@@ -294,7 +294,7 @@ namespace bit
             try
             {
                 /// [1] 봉 얻어오기
-                var result_bucketed = bitemex.bitmex_Get_bucketed("5m", true, "XBTUSD", 3, true);
+                var result_bucketed = bitmex.bitmex_Get_bucketed("5m", true, "XBTUSD", 3, true);
                 List<bitmex_bucketed> bucketeds = new List<bitmex_bucketed>();
                 btmex_Bucketeds = JsonConvert.DeserializeObject<List<bitmex_bucketed>>(result_bucketed);
                 return true;
@@ -320,30 +320,30 @@ namespace bit
         {
             try
             {
-                var json_result = bitemex.GetPositions("{ \"symbol\" : \"XBTUSD\" }");
-                List<bitemex_position> _bitemex_positions = new List<bitemex_position>();
-                _bitemex_positions = JsonConvert.DeserializeObject<List<bitemex_position>>(json_result);
+                var json_result = bitmex.GetPositions("{ \"symbol\" : \"XBTUSD\" }");
+                List<bitmex_position> _bitmex_positions = new List<bitmex_position>();
+                _bitmex_positions = JsonConvert.DeserializeObject<List<bitmex_position>>(json_result);
 
-                if (_bitemex_positions.Count == 1)
+                if (_bitmex_positions.Count == 1)
                 {
                     // 포지션은 무조건 1개 밖에 없을 것임....
-                    if (_bitemex_positions[0].currentQty == 0)
+                    if (_bitmex_positions[0].currentQty == 0)
                     {
-                        bitemex_position.account = 0;
-                        bitemex_position.symbol = "";
-                        bitemex_position.currentQty = 0;
-                        bitemex_position.avgCostPrice = 0.0;
-                        bitemex_position.marginCallPrice = 0.0;
-                        bitemex_position.liquidationPrice = 0.0;
+                        bitmex_position.account = 0;
+                        bitmex_position.symbol = "";
+                        bitmex_position.currentQty = 0;
+                        bitmex_position.avgCostPrice = 0.0;
+                        bitmex_position.marginCallPrice = 0.0;
+                        bitmex_position.liquidationPrice = 0.0;
                     }
                     else
                     {
-                        bitemex_position.account = _bitemex_positions[0].account;
-                        bitemex_position.symbol = _bitemex_positions[0].symbol;
-                        bitemex_position.currentQty = _bitemex_positions[0].currentQty;
-                        bitemex_position.avgCostPrice = _bitemex_positions[0].avgCostPrice;
-                        bitemex_position.marginCallPrice = _bitemex_positions[0].marginCallPrice;
-                        bitemex_position.liquidationPrice = _bitemex_positions[0].liquidationPrice;
+                        bitmex_position.account = _bitmex_positions[0].account;
+                        bitmex_position.symbol = _bitmex_positions[0].symbol;
+                        bitmex_position.currentQty = _bitmex_positions[0].currentQty;
+                        bitmex_position.avgCostPrice = _bitmex_positions[0].avgCostPrice;
+                        bitmex_position.marginCallPrice = _bitmex_positions[0].marginCallPrice;
+                        bitmex_position.liquidationPrice = _bitmex_positions[0].liquidationPrice;
                     }
                     return true;
                 }
@@ -365,19 +365,19 @@ namespace bit
             try
             {
                 user_margin _user_margin = new user_margin();
-                _user_margin = JsonConvert.DeserializeObject<user_margin>(bitemex.GetUserMargin());
+                _user_margin = JsonConvert.DeserializeObject<user_margin>(bitmex.GetUserMargin());
                 txt_position.AppendText("○ " + DateTime.Now.ToString("MM월dd일 HH시mm분") +
-                     "         " + string.Format("{0:#,###}", _user_margin.walletBalance * 0.1) +
-                     "         " + string.Format("{0:#,###}", _user_margin.marginBalance * 0.1) +
-                     "         " + string.Format("{0:#,###}", btmex_Bucketeds[0].close) +
-                     "         " + string.Format("{0:#,###}", bitemex_position.avgCostPrice) + " * " +
-                                   string.Format("{0:#,###}", bitemex_position.currentQty) + "\r\n");
+                     "   " + string.Format("{0:#,###}", _user_margin.walletBalance * 0.1) +
+                     "(" + string.Format("{0:#,###}", _user_margin.marginBalance * 0.1) + ")" +
+                     "   " + string.Format("{0:#,###}", bitmex_position.avgCostPrice) + " * " +
+                             string.Format("{0:#,###}", bitmex_position.currentQty) +
+                     "(현재가-" + string.Format("{0:#,###}", btmex_Bucketeds[0].close) + ")\r\n");
             }
             catch (Exception)
             {
                 //
             }
-            
+
         }
         private void Form1_Load(object sender, EventArgs e)
         {
