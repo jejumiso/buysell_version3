@@ -40,13 +40,43 @@ namespace bit
         }
 
 
+        int i = 0;
+        double d = 0.0;
+        int danger = 0;
+        int danger2 = 0;
         /// <summary>
         /// 
         /// </summary>
         private void Timer1_Tick(object Sender, EventArgs e)
         {
             timer1.Stop();
-            Auto_Trad_Play();
+            
+            try
+            {
+                if (i == 0)
+                {
+                    user_margin _user_margin = new user_margin();
+                    _user_margin = JsonConvert.DeserializeObject<user_margin>(bitmex.GetUserMargin());
+
+                    d = _user_margin.walletBalance ;
+                    step_Qty = (Int32)Math.Round(d * 0.00006, 0);
+                    danger = step_Qty * 30;
+                    danger2 = step_Qty * 10;
+                }
+                i++;
+                if (i == 500)
+                {
+                    i = 0;
+                }
+                //Auto_Trad_Play();
+                txt_position.AppendText(i + " : " + d + "-" + step_Qty + "     danger:" + danger + "     danger2:" + danger2 + "\r\n");
+            }
+            catch (Exception)
+            {
+                
+            }
+
+            
             timer1.Start();
         }
 
@@ -67,15 +97,15 @@ namespace bit
                     if (bitmex_Get_bucketed_2() && bitmex_Get_recent_orders())
                     {
                         double close = btmex_Bucketeds[0].close;
-                        if (Math.Abs(bitmex_position.currentQty) > 17000)
+                        if (Math.Abs(bitmex_position.currentQty) > danger)
                         {
                             if (bitmex_position.currentQty > 0)
                             {
-                                bitmex.PostOrders("XBTUSD", "Sell", 2500, close - 50, "Limit", "overtradEnd");
+                                bitmex.PostOrders("XBTUSD", "Sell", danger2, close - 50, "Limit", "overtradEnd");
                             }
                             else
                             {
-                                bitmex.PostOrders("XBTUSD", "Buy", 2500, close + 50, "Limit", "overtradEnd");
+                                bitmex.PostOrders("XBTUSD", "Buy", danger2, close + 50, "Limit", "overtradEnd");
                             }
                         }
                         order_System2(close);
@@ -100,6 +130,8 @@ namespace bit
             }
         }
 
+        int step_Qty = 150; double step_spring = 5.0; double _margin = 36.0;
+
         List<bitmex_order> pre_recent_orders;
         List<bitmex_order> recent_orders;
         double iniinitial_value = 1000;
@@ -116,11 +148,6 @@ namespace bit
 
 
             //[2-1] setting
-            int step_Qty; double step_spring; double _margin;
-            //step_Qty = 60; step_spring = 5.0; 
-            //step_Qty = 300; step_spring = 5.0;
-            //step_Qty = 25; step_spring = 5.0; _margin = 13.0;
-            step_Qty = 150; step_spring = 5.0; _margin = 36.0;
             //[2-2] setting2
             iniinitial_value = 1000;
             int step_skip = Math.Abs(Convert.ToInt32(Math.Truncate((now_close - iniinitial_value) / step_spring))); // 7010 - 7000 = 10  => skip:2
