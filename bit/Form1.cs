@@ -120,7 +120,7 @@ namespace bit
             //step_Qty = 60; step_spring = 5.0; 
             //step_Qty = 300; step_spring = 5.0;
             //step_Qty = 25; step_spring = 5.0; _margin = 13.0;
-            step_Qty = 250; step_spring = 5.0; _margin = 36.0;
+            step_Qty = 150; step_spring = 5.0; _margin = 36.0;
             //[2-2] setting2
             iniinitial_value = 1000;
             int step_skip = Math.Abs(Convert.ToInt32(Math.Truncate((now_close - iniinitial_value) / step_spring))); // 7010 - 7000 = 10  => skip:2
