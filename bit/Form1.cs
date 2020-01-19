@@ -41,9 +41,10 @@ namespace bit
 
 
         int i = 0;
-        double d = 0.0;
+        double walletBalance = 0.0;
         int danger = 0;
         int danger2 = 0;
+        int step_Qty = 150; double step_spring = 5.0; double _margin = 36.0;
         /// <summary>
         /// 
         /// </summary>
@@ -56,20 +57,25 @@ namespace bit
                 if (i == 0)
                 {
                     user_margin _user_margin = new user_margin();
-                    _user_margin = JsonConvert.DeserializeObject<user_margin>(bitmex.GetUserMargin());
+                    string dss = bitmex.GetUserMargin();
+                    _user_margin = JsonConvert.DeserializeObject<user_margin>(dss);
 
-                    d = _user_margin.walletBalance ;
-                    step_Qty = (Int32)Math.Round(d * 0.00006, 0);
-                    danger = step_Qty * 30;
-                    danger2 = step_Qty * 10;
+                    walletBalance = _user_margin.walletBalance ;
+                    step_Qty = (Int32)Math.Round(walletBalance * 0.00010, 0);
+                    danger = step_Qty * 11;
+                    danger2 = step_Qty * 7; 
                 }
                 i++;
                 if (i == 500)
                 {
                     i = 0;
                 }
+                if (true)
+                {
+
+                }
                 //Auto_Trad_Play();
-                txt_position.AppendText(i + " : " + d + "-" + step_Qty + "     danger:" + danger + "     danger2:" + danger2 + "\r\n");
+                txt_position.AppendText(i + " : " + walletBalance + "-" + step_Qty + "     danger:" + danger + "     danger2:" + danger2 + "\r\n");
             }
             catch (Exception)
             {
@@ -130,7 +136,7 @@ namespace bit
             }
         }
 
-        int step_Qty = 150; double step_spring = 5.0; double _margin = 36.0;
+        
 
         List<bitmex_order> pre_recent_orders;
         List<bitmex_order> recent_orders;
@@ -308,7 +314,7 @@ namespace bit
             btn_Start.Enabled = false;
             btn_Stop.Enabled = true;
 
-            Auto_Trad_Play();
+            //Auto_Trad_Play();
 
             // timer1의 속성 정의 – 코드에서 Timer 생성
             timer1.Enabled = true;
